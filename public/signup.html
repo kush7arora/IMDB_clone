@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html ng-app="imdbApp">
+<head>
+  <meta charset="UTF-8">
+  <title>Signup - IMDb Clone</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- AngularJS CDN -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <!-- Signup app script -->
+  <script src="signupApp.js"></script>
+</head>
+<body class="bg-gray-100">
+  <div class="max-w-md mx-auto mt-16 bg-white shadow-md rounded-lg p-8" ng-controller="SignupController">
+    <h1 class="text-2xl font-bold text-center mb-6">IMDb Clone - Signup</h1>
+    <form ng-submit="signup()" class="mb-6">
+      <input type="text" placeholder="Username" ng-model="signupData.username" required class="w-full p-2 mb-4 border border-gray-300 rounded">
+      <input type="password" placeholder="Password" ng-model="signupData.password" required class="w-full p-2 mb-4 border border-gray-300 rounded">
+      <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white p-2 rounded">Signup</button>
+    </form>
+    <div class="text-center">
+      <p>Already have an account?</p>
+      <a href="login.html" class="text-blue-600 underline">Login</a>
+    </div>
+    <div class="mt-4 text-center text-red-600" ng-if="errorMessage">
+      {{ errorMessage }}
+    </div>
+  </div>
+</body>
+</html>

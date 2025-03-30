@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html ng-app="movieDetailsApp">
+<head>
+  <meta charset="UTF-8">
+  <title>Movie Details - IMDb Clone</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- AngularJS CDN -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <!-- Angular Cookies (for reading cookies) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-cookies.min.js"></script>
+  <!-- Movie Details AngularJS App -->
+  <script src="movieDetailsApp.js"></script>
+</head>
+<body class="bg-gray-100">
+  <div class="container mx-auto p-4" ng-controller="MovieDetailsController">
+    <button onclick="window.history.back()" class="mb-4 bg-blue-500 hover:bg-blue-600 text-white p-2 rounded">Back</button>
+    
+    <div ng-if="movie" class="flex flex-col md:flex-row gap-8">
+      <!-- Left Column: Movie Details -->
+      <div class="bg-white shadow-md rounded-lg overflow-hidden max-w-sm mx-auto md:mx-0">
+        <div class="w-full h-48 flex items-center justify-center bg-gray-200">
+          <!-- Use OMDb Poster; if not available, use a placeholder -->
+          <img class="w-40 h-40 object-contain" 
+               ng-src="{{ movie.Poster !== 'N/A' ? movie.Poster : 'placeholder.jpg' }}" 
+               alt="{{ movie.Title }}">
+        </div>
+        <div class="p-4">
+          <h2 class="text-2xl font-bold mb-4">{{ movie.Title }}</h2>
+          <p class="text-gray-600 text-lg mb-2">IMDB Rating: {{ movie.imdbRating }}/10</p>
+          <p class="text-gray-700 text-base mb-4">{{ movie.Plot }}</p>
+          <p class="text-gray-500 text-sm mb-4">Released: {{ movie.Released }}</p>
+          <button ng-click="addToWishlist()" class="bg-green-500 hover:bg-green-600 text-white p-2 rounded">
+            Add to Wishlist
+          </button>
+        </div>
+      </div>
+      
+      <!-- Right Column: Comments, Rating, and Average Rating -->
+      <div class="bg-white shadow-md rounded-lg p-6 flex-1">
+        <h3 class="text-xl font-bold mb-4">Comments & Ratings</h3>
+        
+        <!-- Display Average Rating -->
+        <div class="mb-4">
+          <p class="text-gray-800 font-semibold">Average Rating: {{ averageRating | number:1 }}/5 ({{ ratingsCount }} ratings)</p>
+        </div>
+        
+        <!-- Existing Comments -->
+        <div ng-if="comments.length > 0" class="mb-4 max-h-64 overflow-y-auto">
+          <div ng-repeat="comment in comments" class="mb-2 p-2 border-b">
+            <p class="text-gray-800"><strong>{{ comment.username }}</strong>: {{ comment.text }}</p>
+            <p class="text-gray-600 text-sm">Rating: {{ comment.rating }}/5</p>
+          </div>
+        </div>
+        <div ng-if="comments.length === 0" class="mb-4">
+          <p class="text-gray-600">No comments yet.</p>
+        </div>
+        
+        <!-- Comment Form -->
+        <form ng-submit="submitComment()">
+          <div class="mb-4">
+            <label class="block text-gray-700 mb-2">Your Comment</label>
+            <textarea ng-model="newComment.text" class="w-full p-2 border border-gray-300 rounded" rows="3" placeholder="Write your comment..."></textarea>
+          </div>
+          <!-- Rating Buttons -->
+          <div class="mb-4">
+            <label class="block text-gray-700 mb-2">Your Rating</label>
+            <div class="flex space-x-2">
+              <button type="button" ng-click="selectRating(1)" class="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400">1</button>
+              <button type="button" ng-click="selectRating(2)" class="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400">2</button>
+              <button type="button" ng-click="selectRating(3)" class="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400">3</button>
+              <button type="button" ng-click="selectRating(4)" class="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400">4</button>
+              <button type="button" ng-click="selectRating(5)" class="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400">5</button>
+            </div>
+            <div class="mt-2" ng-if="newComment.rating">
+              <span class="text-gray-700">Selected Rating: {{ newComment.rating }}</span>
+            </div>
+          </div>
+          <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded">
+            Post Comment & Rating
+          </button>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Error Message -->
+    <div ng-if="errorMessage" class="text-center mt-6">
+      <p class="text-red-500">{{ errorMessage }}</p>
+    </div>
+  </div>
+</body>
+</html>

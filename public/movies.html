@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html ng-app="imdbApp">
+<head>
+  <meta charset="UTF-8">
+  <title>Movie Cards - IMDb Clone</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- AngularJS CDN -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <!-- Movies AngularJS App -->
+  <script src="moviesApp.js"></script>
+</head>
+<body class="bg-gray-100">
+  <div class="container mx-auto p-4" ng-controller="MoviesController">
+    <h1 class="text-3xl font-bold text-center mb-8">Movies</h1>
+    
+    <!-- Search Bar -->
+    <div class="mb-6">
+      <input type="text" ng-model="searchTerm" placeholder="Search movies..." class="w-full p-2 border border-gray-300 rounded" />
+    </div>
+    
+    <!-- Movie Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div class="bg-white shadow-md rounded-lg overflow-hidden" ng-repeat="movie in movies">
+        <!-- Clickable link passing movie id (using imdbID) -->
+        <a href="movieDetails.html?id={{movie.imdbID}}">
+          <img class="w-full h-64 object-cover" 
+               ng-src="{{ movie.Poster !== 'N/A' ? movie.Poster : 'placeholder.jpg' }}" 
+               alt="{{ movie.Title }}">
+          <div class="p-4">
+            <h2 class="text-xl font-semibold mb-2">{{ movie.Title }}</h2>
+            <p class="text-gray-600 text-sm mb-2">Year: {{ movie.Year }}</p>
+          </div>
+        </a>
+      </div>
+    </div>
+    
+    <!-- Error Message -->
+    <div class="text-center mt-6" ng-if="errorMessage">
+      <p class="text-red-500">{{ errorMessage }}</p>
+    </div>
+  </div>
+</body>
+</html>
