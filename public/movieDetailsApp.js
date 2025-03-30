@@ -1,24 +1,50 @@
 angular.module('movieDetailsApp', ['ngCookies'])
-  .controller('MovieDetailsController', ['$scope', '$http', '$cookies', function($scope, $http, $cookies) {
+  .controller('MovieDetailsController', ['$scope', '$http', '$cookies', '$window', function($scope, $http, $cookies, $window) {
     $scope.movie = null;
     $scope.errorMessage = '';
     $scope.comments = [];
     $scope.averageRating = 0;
     $scope.ratingsCount = 0;
 
-    // Ensure the cookie is set with a default username if none exists
-    if (!$cookies.get('username')) {
-      $cookies.put('username', 'Anonymous', { path: '/' });
-    }
-
-    // Retrieve username from cookie and set it for new comments
-    $scope.newComment = {
-      text: '',
-      rating: null,
+    // Get current user from cookie
+    $scope.currentUser = {
       username: $cookies.get('username')
     };
 
+    // Redirect to login if no username cookie exists
+    if (!$scope.currentUser.username) {
+      $window.location.href = '/signup';
+      return;
+    }
+
+    // Get username from cookie
+    $scope.newComment = {
+      text: '',
+      rating: null,
+      username: $scope.currentUser.username
+    };
+
     console.log("Retrieved username from cookie:", $scope.newComment.username);
+
+    // Logout function
+    $scope.logout = function() {
+      $http.post('/api/auth/logout', {}, { withCredentials: true })
+        .then(function(response) {
+          // Clear all cookies
+          $cookies.remove('username', { path: '/' });
+          $cookies.remove('connect.sid', { path: '/' });
+          
+          // Redirect to signup page
+          $window.location.href = '/signup';
+        })
+        .catch(function(error) {
+          console.error('Logout error:', error);
+          // Even if the server request fails, clear cookies and redirect
+          $cookies.remove('username', { path: '/' });
+          $cookies.remove('connect.sid', { path: '/' });
+          $window.location.href = '/signup';
+        });
+    };
 
     // Extract movie id (IMDb ID) from the URL query parameter
     const urlParams = new URLSearchParams(window.location.search);

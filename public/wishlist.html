@@ -7,28 +7,41 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- AngularJS CDN -->
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
-  <!-- Wishlist AngularJS App -->
+  <!-- Angular Cookies -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-cookies.min.js"></script>
+  <!-- Wishlist app script -->
   <script src="wishlistApp.js"></script>
 </head>
-<body class="bg-gray-100">
-  <div class="container mx-auto p-4" ng-controller="WishlistController">
-    <h1 class="text-3xl font-bold text-center mb-8">My Wishlist</h1>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      <div class="bg-white shadow-md rounded-lg overflow-hidden max-w-sm mx-auto" ng-repeat="movie in wishlist">
-        <!-- Display the movie poster from OMDb -->
-        <img class="w-full h-48 object-cover" 
-             ng-src="{{ movie.Poster !== 'N/A' ? movie.Poster : 'placeholder.jpg' }}" 
-             alt="{{ movie.Title }}">
+<body class="bg-gray-100" ng-controller="WishlistController">
+  <!-- Header with Username and Logout -->
+  <div class="bg-white shadow-md mb-4">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center">
+        <span class="text-gray-700 mr-4">Welcome, {{ currentUser.username }}</span>
+      </div>
+      <div>
+        <button ng-click="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+          Logout
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-6">My Wishlist</h1>
+    <!-- Wishlist Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div ng-repeat="movie in wishlist" class="bg-white shadow-md rounded-lg overflow-hidden">
+        <img ng-src="{{ movie.Poster !== 'N/A' ? movie.Poster : 'placeholder.jpg' }}" alt="{{ movie.Title }}" class="w-full h-64 object-cover">
         <div class="p-4">
-          <h2 class="text-xl font-semibold mb-2">{{ movie.Title }}</h2>
-          <p class="text-gray-600 text-sm mb-2">IMDB Rating: {{ movie.imdbRating }}</p>
-          <p class="text-gray-700 text-base">
-            {{ movie.Plot | limitTo: 100 }}{{ movie.Plot.length > 100 ? '...' : '' }}
-          </p>
+          <h2 class="text-xl font-bold mb-2">{{ movie.Title }}</h2>
+          <p class="text-gray-600">{{ movie.Year }}</p>
+          <a href="/movie-details?id={{ movie.imdbID }}" class="mt-2 inline-block bg-blue-500 hover:bg-blue-600 text-white p-2 rounded">View Details</a>
         </div>
       </div>
     </div>
-    <div class="text-center mt-6" ng-if="errorMessage">
+    <!-- Error Message -->
+    <div ng-if="errorMessage" class="text-center mt-6">
       <p class="text-red-500">{{ errorMessage }}</p>
     </div>
   </div>
