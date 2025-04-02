@@ -3,44 +3,70 @@ angular.module('wishlistApp', ['ngCookies'])
     $scope.wishlist = [];
     $scope.errorMessage = '';
 
-    // Get current user from cookie
-    $scope.currentUser = {
-      username: $cookies.get('username')
-    };
-
-    // Redirect to login if no username cookie exists
-    if (!$scope.currentUser.username) {
+    // Check if user is logged in
+    if (!$cookies.get('user')) {
       $window.location.href = '/signup';
       return;
     }
 
-    // Logout function
-    $scope.logout = function() {
-      $http.post('/api/auth/logout', {}, { withCredentials: true })
+    // Get user data from cookie with error handling
+    try {
+      const userData = JSON.parse($cookies.get('user'));
+      if (!userData || !userData.username) {
+        throw new Error('Invalid user data');
+      }
+      $scope.currentUser = userData.username;
+    } catch (error) {
+      console.error('Error parsing user cookie:', error);
+      $cookies.remove('user');
+      $window.location.href = '/signup';
+      return;
+    }
+
+    // Navigation functions
+    $scope.goToMovies = function() {
+      $window.location.href = '/movies';
+    };
+
+    // View movie details function
+    $scope.viewDetails = function(movieId) {
+      $window.location.href = '/movie-details?id=' + movieId;
+    };
+
+    // Mark movie as watched (removes from wishlist)
+    $scope.markAsWatched = function(movieId) {
+      $http.delete(`/api/wishlist/remove/${movieId}`)
         .then(function(response) {
-          // Clear all cookies
-          $cookies.remove('username', { path: '/' });
-          $cookies.remove('connect.sid', { path: '/' });
+          // Remove the movie from the local wishlist array
+          $scope.wishlist = $scope.wishlist.filter(movie => movie.movieId !== movieId);
           
-          // Redirect to signup page
-          $window.location.href = '/signup';
+          // Show success message
+          alert('Movie marked as watched and removed from wishlist!');
         })
         .catch(function(error) {
-          console.error('Logout error:', error);
-          // Even if the server request fails, clear cookies and redirect
-          $cookies.remove('username', { path: '/' });
-          $cookies.remove('connect.sid', { path: '/' });
-          $window.location.href = '/signup';
+          console.error('Error marking movie as watched:', error);
+          $scope.errorMessage = 'Failed to mark movie as watched. Please try again.';
         });
     };
 
-    // This call should return a wishlist array containing OMDb-style movie objects.
+    // Logout function
+    $scope.logout = function() {
+      $cookies.remove('user');
+      $window.location.href = '/signup';
+    };
+
+    // Load wishlist
     $http.get('/api/wishlist')
       .then(function(response) {
-        $scope.wishlist = response.data.wishlist;
+        if (response.data && response.data.wishlist) {
+          $scope.wishlist = response.data.wishlist;
+        } else {
+          $scope.wishlist = [];
+          $scope.errorMessage = 'No movies in your wishlist.';
+        }
       })
       .catch(function(error) {
-        console.error('Error fetching wishlist:', error);
-        $scope.errorMessage = 'Failed to load wishlist. Please try again later.';
+        console.error('Error loading wishlist:', error);
+        $scope.errorMessage = 'Error loading wishlist. Please try again.';
       });
   }]);

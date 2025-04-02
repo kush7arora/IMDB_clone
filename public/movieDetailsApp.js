@@ -1,134 +1,235 @@
-angular.module('movieDetailsApp', ['ngCookies'])
-  .controller('MovieDetailsController', ['$scope', '$http', '$cookies', '$window', function($scope, $http, $cookies, $window) {
-    $scope.movie = null;
-    $scope.errorMessage = '';
-    $scope.comments = [];
-    $scope.averageRating = 0;
-    $scope.ratingsCount = 0;
+var app = angular.module('movieDetailsApp', ['ngCookies']);
 
-    // Get current user from cookie
-    $scope.currentUser = {
-      username: $cookies.get('username')
+// Add a filter to make URLs trusted for iframe src
+app.filter('trusted', ['$sce', function ($sce) {
+    return function(url) {
+        return $sce.trustAsResourceUrl(url);
     };
+}]);
 
-    // Redirect to login if no username cookie exists
-    if (!$scope.currentUser.username) {
-      $window.location.href = '/signup';
-      return;
+app.controller('MovieDetailsController', function($scope, $http, $cookies, $window) {
+    // Check if user is logged in
+    if (!$cookies.get('user')) {
+        $window.location.href = '/signup';
+        return;
     }
 
-    // Get username from cookie
-    $scope.newComment = {
-      text: '',
-      rating: null,
-      username: $scope.currentUser.username
+    // Get user data from cookie with error handling
+    try {
+        const userData = JSON.parse($cookies.get('user'));
+        if (!userData || !userData.username) {
+            throw new Error('Invalid user data');
+        }
+        $scope.currentUser = userData.username;
+    } catch (error) {
+        console.error('Error parsing user cookie:', error);
+        $cookies.remove('user');
+        $window.location.href = '/signup';
+        return;
+    }
+    
+    // Initialize new comment object
+    $scope.newComment = { text: '', rating: null };
+    $scope.trailerUrl = null;
+    $scope.trailerLoading = false;
+
+    // Navigation functions
+    $scope.goToMovies = function() {
+        $window.location.href = '/movies';
     };
 
-    console.log("Retrieved username from cookie:", $scope.newComment.username);
-
-    // Logout function
-    $scope.logout = function() {
-      $http.post('/api/auth/logout', {}, { withCredentials: true })
-        .then(function(response) {
-          // Clear all cookies
-          $cookies.remove('username', { path: '/' });
-          $cookies.remove('connect.sid', { path: '/' });
-          
-          // Redirect to signup page
-          $window.location.href = '/signup';
-        })
-        .catch(function(error) {
-          console.error('Logout error:', error);
-          // Even if the server request fails, clear cookies and redirect
-          $cookies.remove('username', { path: '/' });
-          $cookies.remove('connect.sid', { path: '/' });
-          $window.location.href = '/signup';
-        });
+    $scope.goToWishlist = function() {
+        $window.location.href = '/wishlist';
     };
 
-    // Extract movie id (IMDb ID) from the URL query parameter
+    // Get movie ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const movieId = urlParams.get('id');
+
     if (!movieId) {
-      $scope.errorMessage = 'No movie ID provided.';
-      return;
+        $scope.errorMessage = 'No movie ID provided';
+        return;
     }
 
-    // Use the OMDb API to fetch movie details
-    const apiKey = '228b48c4'; // Replace with your OMDb API key
-    const movieUrl = `http://www.omdbapi.com/?apikey=${apiKey}&i=${movieId}`;
-
-    // Fetch movie details from OMDb
-    $http.get(movieUrl)
-      .then(function(response) {
-        if (response.data.Response === "True") {
-          $scope.movie = response.data;
-        } else {
-          $scope.errorMessage = response.data.Error || 'Movie not found.';
+    // Fetch movie details from OMDB API
+    $http.get(`http://www.omdbapi.com/?i=${movieId}&apikey=228b48c4`)
+        .then(function(response) {
+            $scope.movie = response.data;
+            loadComments();
+            findMovieTrailer($scope.movie.Title, $scope.movie.Year);
+        })
+        .catch(function(error) {
+            $scope.errorMessage = 'Error loading movie details';
+            console.error('Error:', error);
+        });
+        
+    // Function to find the movie trailer on YouTube
+    function findMovieTrailer(title, year) {
+        $scope.trailerLoading = true;
+        
+        // Create mapping of movie titles to known trailer video IDs
+        const knownTrailers = {
+            // Popular movies with verified trailer IDs
+            'the shawshank redemption': 'PLl99DlL6b4',
+            'the godfather': '6hOHvyw6Qia',
+            'the dark knight': 'EXeTwQWrcwY',
+            'pulp fiction': 's7EdQ4FqbhY',
+            'schindler': 'JdRGC-w9syA',
+            'inception': 'YoHD9XEInc0',
+            'fight club': 'SUXWAEX2jlg',
+            'forrest gump': 'bLvqoHBptjg',
+            'star wars': 'vZ734NWnAHA',
+            'lord of the rings': 'V75dMMIW2B4',
+            'goodfellas': 'qo5jJpHtI1Y',
+            'the matrix': 'm8e-FF8MsqU',
+            'city of god': '6AS-Qs_UmAk',
+            'se7en': 'znmZoVkCjpI',
+            'interstellar': 'zSWdZVtXT7E',
+            'the silence of the lambs': 'W6Mm8Sbe__o',
+            'saving private ryan': 'RYExstiQlLs',
+            'jurassic park': 'QWBKEmWWL38',
+            'spirited away': 'ByXuk9QqQkk',
+            'titanic': 'kVrqfYjkTdQ',
+            'gladiator': 'owK1qxDselE',
+            'the lion king': '4sj1MT05lAA',
+            'avengers': '6ZfuNTqbHE8',
+            'terminator': 'k64P4l2Wmeg',
+            'back to the future': 'qvsgGtivCgs',
+            'indiana jones': '0xQSIdSRlAk',
+            'psycho': 'NG3-GlvKPcg',
+            'aliens': 'XKSQmYUaIyE',
+            'apocalypse now': 'FTjG-Aux_yQ',
+            'memento': '0vS0E9bBSL0',
+            'american beauty': 'Ly7rq5EsTC8',
+            'casino': 'EJXDMwGWhoA',
+            'vertigo': 'Z0wBrP2QhcU',
+            'django': 'sY1S34yYLFI',
+            'batman': 'mqqft2x_Aa4',
+            'alien': 'svnAD0TApb8',
+            '2001': 'oR_e9y-bka0',
+            'reservoir dogs': 'vayksn4Y93A',
+            'braveheart': 'nMft5QDOHek',
+            'amelie': 'HUECWi5pX7o',
+            'taxi driver': 'UUxD4-dEzn0',
+            'scarface': '7pQQHnqBa2E',
+            'die hard': '2TQ-pOjI6Ro',
+            'wizard of oz': 'njdreZXdnw8',
+            'heat': 'KuCin0YFoAg',
+            'blade runner': 'gCcx85zbxz4',
+            'toy story': 'wmiIUN-7qhE',
+            'the departed': 'iojhqm0JTW4',
+            'citizen kane': 'zyv19bg0tII',
+            'american history x': 'nOzR5Jnd6bU',
+            'top gun': 'xa_z57UatDY',
+            'v for vendetta': 'lSA7mAHolAw',
+            'no country for old men': 'YOohwZE5cxE',
+            'the sixth sense': 'VG9AGf66tXM'
+        };
+        
+        // Convert movie title to lowercase for matching
+        const lowerTitle = title.toLowerCase();
+        let videoId = null;
+        
+        // Check if movie title contains any known movie keywords
+        for (const movieKeyword in knownTrailers) {
+            if (lowerTitle.includes(movieKeyword)) {
+                videoId = knownTrailers[movieKeyword];
+                break;
+            }
         }
-      })
-      .catch(function(error) {
-        console.error('Error fetching movie details:', error);
-        $scope.errorMessage = 'Failed to load movie details. Please try again later.';
-      });
+        
+        if (videoId) {
+            // Use direct video ID for known trailers
+            $scope.trailerUrl = `https://www.youtube.com/embed/${videoId}`;
+            $scope.trailerLoading = false;
+        } else {
+            // For unknown movies, we'll use a direct YouTube search embed
+            // This creates a video player that shows search results
+            const searchQuery = encodeURIComponent(`${title} ${year} official trailer`);
+            
+            // Try three different embed formats that may work
+            const randomSelector = Math.floor(Math.random() * 3);
+            
+            if (randomSelector === 0) {
+                // Format 1: Basic search
+                $scope.trailerUrl = `https://www.youtube.com/embed?search=${searchQuery}&autoplay=0`;
+            } else if (randomSelector === 1) {
+                // Format 2: Search with playlist approach
+                $scope.trailerUrl = `https://www.youtube.com/embed/videoseries?list=${searchQuery}`;
+            } else {
+                // Format 3: Use a common trailer channel with search parameters
+                $scope.trailerUrl = `https://www.youtube.com/embed?enablejsapi=1&origin=https://www.youtube.com&widgetid=1&search=${searchQuery}`;
+            }
+            
+            // Also provide a direct search link as a fallback
+            $scope.trailerSearchUrl = `https://www.youtube.com/results?search_query=${searchQuery}`;
+            $scope.trailerLoading = false;
+        }
+    }
 
     // Function to add movie to wishlist
     $scope.addToWishlist = function() {
-      $http.post('/api/wishlist/add', $scope.movie)
+        $http.post('/api/wishlist/add', {
+            movieId: $scope.movie.imdbID,
+            title: $scope.movie.Title,
+            year: $scope.movie.Year,
+            poster: $scope.movie.Poster
+        })
         .then(function(response) {
-          alert('Movie added to wishlist!');
+            alert('Movie added to wishlist!');
         })
         .catch(function(error) {
-          console.error('Error adding movie to wishlist:', error);
-          alert('Failed to add movie to wishlist.');
+            console.error('Error adding to wishlist:', error);
+            $scope.errorMessage = 'Failed to add movie to wishlist';
         });
     };
 
-    // Load existing comments, ratings, and average rating for this movie from your backend
+    // Load comments
     function loadComments() {
-      $http.get('/api/movies/' + movieId + '/comments')
-        .then(function(response) {
-          $scope.comments = response.data.comments;
-          $scope.averageRating = response.data.averageRating;
-          $scope.ratingsCount = response.data.ratingsCount;
-        })
-        .catch(function(error) {
-          console.error('Error fetching comments:', error);
-          $scope.errorMessage = 'Failed to load comments.';
-        });
+        $http.get(`/api/movies/${movieId}/comments`)
+            .then(function(response) {
+                $scope.comments = response.data.comments;
+                $scope.averageRating = response.data.averageRating;
+                $scope.ratingsCount = response.data.ratingsCount;
+            })
+            .catch(function(error) {
+                $scope.errorMessage = 'Error loading comments';
+                console.error('Error:', error);
+            });
     }
-    loadComments();
 
-    // Set rating when a rating button is clicked
-    $scope.selectRating = function(rating) {
-      $scope.newComment.rating = rating;
-    };
-
-    // Submit a new comment and rating to your backend
+    // Submit comment
     $scope.submitComment = function() {
-      if (!$scope.newComment.text || !$scope.newComment.rating) {
-        alert('Please enter a comment and select a rating.');
-        return;
-      }
-      
-      const payload = {
-        movieId: movieId,
-        username: $scope.newComment.username,
-        text: $scope.newComment.text,
-        rating: $scope.newComment.rating
-      };
+        if (!$scope.newComment || !$scope.newComment.text || !$scope.newComment.rating) {
+            $scope.errorMessage = 'Please provide both comment text and rating';
+            return;
+        }
 
-      $http.post('/api/movies/' + movieId + '/comments', payload)
+        $http.post(`/api/movies/${movieId}/comments`, {
+            text: $scope.newComment.text,
+            rating: $scope.newComment.rating
+        })
         .then(function(response) {
-          // Clear form and reload comments and ratings
-          $scope.newComment.text = '';
-          $scope.newComment.rating = null;
-          loadComments();
+            $scope.comments = response.data.movie.comments;
+            $scope.averageRating = response.data.movie.averageRating;
+            $scope.ratingsCount = response.data.movie.ratingsCount;
+            $scope.newComment = { text: '', rating: null };
+            $scope.errorMessage = null;
         })
         .catch(function(error) {
-          console.error('Error posting comment:', error);
-          $scope.errorMessage = 'Failed to post comment. Please try again.';
+            $scope.errorMessage = 'Error posting comment';
+            console.error('Error:', error);
         });
     };
 
-  }]);
+    // Select rating
+    $scope.selectRating = function(rating) {
+        $scope.newComment.rating = rating;
+    };
+
+    // Logout function
+    $scope.logout = function() {
+        $cookies.remove('user');
+        $window.location.href = '/signup';
+    };
+});

@@ -20,11 +20,14 @@ exports.signup = async (req, res) => {
     const newUser = new User({ username, password: hashedPassword });
     await newUser.save();
     
-    // Optionally, automatically log the user in after signup
-    req.session.user = { id: newUser._id, username: newUser.username };
-    
-    // Set username cookie
-    res.cookie('username', username, { path: '/' });
+    // Set user cookie with full user object
+    const userData = { id: newUser._id, username: newUser.username };
+    res.cookie('user', JSON.stringify(userData), { 
+      path: '/',
+      httpOnly: false, // Allow JavaScript access
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax'
+    });
     
     res.status(201).json({ message: 'User created successfully' });
     
@@ -49,11 +52,14 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid username or password' });
     }
     
-    // Set user info in session
-    req.session.user = { id: user._id, username: user.username };
-    
-    // Set username cookie
-    res.cookie('username', username, { path: '/' });
+    // Set user cookie with full user object
+    const userData = { id: user._id, username: user.username };
+    res.cookie('user', JSON.stringify(userData), { 
+      path: '/',
+      httpOnly: false, // Allow JavaScript access
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax'
+    });
     
     return res.json({ message: 'Login successful' });
     
@@ -63,13 +69,7 @@ exports.login = async (req, res) => {
 };
 
 exports.logout = (req, res) => {
-  // Destroy the session on logout
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error logging out', err });
-    }
-    res.clearCookie('connect.sid'); // Default cookie name for sessions
-    res.clearCookie('username'); // Clear the username cookie
-    return res.json({ message: 'Logout successful' });
-  });
+  // Clear the user cookie
+  res.clearCookie('user', { path: '/' });
+  return res.json({ message: 'Logout successful' });
 };

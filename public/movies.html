@@ -2,9 +2,21 @@
 <html ng-app="imdbApp">
 <head>
   <meta charset="UTF-8">
-  <title>Movies - IMDb Clone</title>
+  <title>Webflix - Movies</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'webflix-bg': 'rgb(51, 47, 36)',
+            'webflix-gold': 'rgb(219, 166, 20)',
+          }
+        }
+      }
+    }
+  </script>
   <!-- AngularJS CDN -->
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
   <!-- Angular Cookies -->
@@ -12,39 +24,82 @@
   <!-- Movies app script -->
   <script src="moviesApp.js"></script>
 </head>
-<body class="bg-gray-100" ng-controller="MoviesController">
-  <!-- Header with Username and Logout -->
-  <div class="bg-white shadow-md mb-4">
-    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-      <div class="flex items-center">
-        <span class="text-gray-700 mr-4">Welcome, {{ currentUser.username }}</span>
-      </div>
+<body class="bg-webflix-bg text-webflix-gold" ng-controller="MoviesController">
+  <!-- Sticky Header with Username and Logout -->
+  <div class="bg-black bg-opacity-80 shadow-md fixed top-0 left-0 right-0 z-10">
+    <div class="container mx-auto px-4 py-2 flex justify-between items-center">
       <div>
-        <button ng-click="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+        <h1 class="text-xl font-bold text-webflix-gold">WEBFLIX</h1>
+      </div>
+      <div class="flex items-center">
+        <span class="text-webflix-gold mr-4">Welcome, {{ currentUser }}</span>
+        <button ng-click="goToWishlist()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded mr-2 text-sm">
+          My Wishlist
+        </button>
+        <button ng-click="logout()" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm">
           Logout
         </button>
       </div>
     </div>
   </div>
 
-  <div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-6">IMDb Clone - Movies</h1>
-    <!-- Search Bar -->
-    <div class="mb-6">
-      <input type="text" ng-model="searchTerm" placeholder="Search movies..." class="w-full p-2 border border-gray-300 rounded">
-      <button ng-click="searchMovies()" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white p-2 rounded">Search</button>
+  <div class="container mx-auto p-4 pt-16 mt-2">
+    <h1 class="text-2xl font-bold mb-6 text-webflix-gold text-center">Browse Movies</h1>
+    
+    <!-- Search Bar - Centered and Narrower -->
+    <div class="mb-6 flex justify-center">
+      <div class="w-full max-w-md flex">
+        <input type="text" ng-model="searchTerm" placeholder="Search movies..." class="w-full p-2 border border-gray-700 rounded-l bg-gray-800 text-white">
+        <button ng-click="searchMovies()" class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-r whitespace-nowrap">Search</button>
+      </div>
     </div>
-    <!-- Movies Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div ng-repeat="movie in movies" class="bg-white shadow-md rounded-lg overflow-hidden">
-        <img ng-src="{{ movie.Poster !== 'N/A' ? movie.Poster : 'placeholder.jpg' }}" alt="{{ movie.Title }}" class="w-full h-64 object-cover">
-        <div class="p-4">
-          <h2 class="text-xl font-bold mb-2">{{ movie.Title }}</h2>
-          <p class="text-gray-600">{{ movie.Year }}</p>
-          <a href="/movie-details?id={{ movie.imdbID }}" class="mt-2 inline-block bg-blue-500 hover:bg-blue-600 text-white p-2 rounded">View Details</a>
+    
+    <!-- Featured Random Movie -->
+    <div class="mb-8 flex justify-center" ng-if="movies.length > 0">
+      <div class="w-4/5 bg-gray-900 shadow-md rounded-lg overflow-hidden border border-gray-800 hover:shadow-lg transition-all">
+        <div class="flex flex-col md:flex-row">
+          <div class="md:w-2/5">
+            <img ng-src="{{ randomMovie.Poster !== 'N/A' ? randomMovie.Poster : 'placeholder.jpg' }}" 
+                alt="{{ randomMovie.Title }}" 
+                class="w-full h-full object-cover">
+          </div>
+          <div class="md:w-3/5 p-6">
+            <h2 class="text-3xl font-bold mb-4 text-webflix-gold">{{ randomMovie.Title }}</h2>
+            <p class="text-xl mb-4 text-webflix-gold">{{ randomMovie.Year }}</p>
+            <p class="text-webflix-gold mb-2">Featured Movie</p>
+            <!-- Additional movie details -->
+            <div class="mb-4" ng-if="randomMovieDetails">
+              <p class="text-webflix-gold mb-1"><span class="font-semibold">Director:</span> {{ randomMovieDetails.Director }}</p>
+              <p class="text-webflix-gold mb-1"><span class="font-semibold">Runtime:</span> {{ randomMovieDetails.Runtime }}</p>
+              <p class="text-webflix-gold mb-1"><span class="font-semibold">Genre:</span> {{ randomMovieDetails.Genre }}</p>
+              <p class="text-webflix-gold mb-1"><span class="font-semibold">Plot:</span> {{ randomMovieDetails.Plot }}</p>
+            </div>
+            <div class="flex space-x-4">
+              <button ng-click="viewDetails(randomMovie.imdbID)" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                View Details
+              </button>
+              <button ng-click="addToWishlist(randomMovie)" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">
+                Add to Wishlist
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+    
+    <!-- Movies Grid -->
+    <h2 class="text-xl font-bold mb-4 text-webflix-gold">All Movies</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div ng-repeat="movie in movies" class="bg-gray-900 shadow-md rounded-lg overflow-hidden border border-gray-800 hover:shadow-lg hover:border-gray-700 transition-all">
+        <img ng-src="{{ movie.Poster !== 'N/A' ? movie.Poster : 'placeholder.jpg' }}" alt="{{ movie.Title }}" class="w-full h-64 object-cover">
+        <div class="p-4">
+          <h2 class="text-xl font-bold mb-2 text-webflix-gold">{{ movie.Title }}</h2>
+          <p class="text-webflix-gold">{{ movie.Year }}</p>
+          <button ng-click="viewDetails(movie.imdbID)" class="mt-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded w-full">View Details</button>
+        </div>
+      </div>
+    </div>
+    
     <!-- Error Message -->
     <div ng-if="errorMessage" class="text-center mt-6">
       <p class="text-red-500">{{ errorMessage }}</p>
