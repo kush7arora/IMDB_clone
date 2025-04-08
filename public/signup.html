@@ -2,27 +2,42 @@
 <html ng-app="imdbApp">
 <head>
   <meta charset="UTF-8">
-  <title>Signup - IMDb Clone</title>
+  <title>Signup - Webflix</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'webflix-bg': '#1a0b2e', /* deep purple navy */
+            'webflix-accent': '#2fd8f2', /* bright teal/blue */
+            'webflix-dark': '#0d0521', /* darker purple for navigation */
+            'webflix-light': '#ffffff', /* white text */
+            'webflix-secondary': '#502d90' /* medium purple for elements */
+          }
+        }
+      }
+    }
+  </script>
   <!-- AngularJS CDN -->
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
   <!-- Signup app script -->
   <script src="signupApp.js"></script>
 </head>
-<body class="bg-gray-100">
-  <div class="max-w-md mx-auto mt-16 bg-white shadow-md rounded-lg p-8" ng-controller="SignupController">
-    <h1 class="text-2xl font-bold text-center mb-6">IMDb Clone - Signup</h1>
+<body class="bg-webflix-bg">
+  <div class="max-w-md mx-auto mt-16 bg-webflix-secondary bg-opacity-30 shadow-md rounded-lg p-8 border border-webflix-secondary" ng-controller="SignupController">
+    <h1 class="text-2xl font-bold text-center mb-6 text-webflix-accent">WEBFLIX - Signup</h1>
     <form ng-submit="signup()" class="mb-6">
-      <input type="text" placeholder="Username" ng-model="signupData.username" required class="w-full p-2 mb-4 border border-gray-300 rounded">
-      <input type="password" placeholder="Password" ng-model="signupData.password" required class="w-full p-2 mb-4 border border-gray-300 rounded">
-      <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white p-2 rounded">Signup</button>
+      <input type="text" placeholder="Username" ng-model="signupData.username" required class="w-full p-2 mb-4 bg-webflix-dark bg-opacity-70 border border-webflix-secondary rounded text-webflix-light">
+      <input type="password" placeholder="Password" ng-model="signupData.password" required class="w-full p-2 mb-4 bg-webflix-dark bg-opacity-70 border border-webflix-secondary rounded text-webflix-light">
+      <button type="submit" class="w-full bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium p-2 rounded">Signup</button>
     </form>
-    <div class="text-center">
+    <div class="text-center text-webflix-light">
       <p>Already have an account?</p>
-      <a href="login.html" class="text-blue-600 underline">Login</a>
+      <a href="login.html" class="text-webflix-accent hover:underline">Login</a>
     </div>
-    <div class="mt-4 text-center text-red-600" ng-if="errorMessage">
+    <div class="mt-4 text-center text-red-400" ng-if="errorMessage">
       {{ errorMessage }}
     </div>
   </div>

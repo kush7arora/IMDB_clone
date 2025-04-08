@@ -55,6 +55,10 @@ angular.module('imdbApp', ['ngCookies'])
     $scope.goToMovies = function() {
       $window.location.href = '/movies';
     };
+    
+    $scope.goToRandomMovie = function() {
+      $window.location.href = '/randomMovie';
+    };
 
     // Function to search movies
     $scope.searchMovies = function() {

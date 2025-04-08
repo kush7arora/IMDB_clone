@@ -45,23 +45,51 @@ app.controller('MovieDetailsController', function($scope, $http, $cookies, $wind
     // Get movie ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const movieId = urlParams.get('id');
+    const movieTitle = urlParams.get('title');
+    const movieYear = urlParams.get('year');
 
-    if (!movieId) {
-        $scope.errorMessage = 'No movie ID provided';
+    if (!movieId && !movieTitle) {
+        $scope.errorMessage = 'No movie ID or title provided';
         return;
     }
 
-    // Fetch movie details from OMDB API
-    $http.get(`http://www.omdbapi.com/?i=${movieId}&apikey=228b48c4`)
-        .then(function(response) {
-            $scope.movie = response.data;
-            loadComments();
-            findMovieTrailer($scope.movie.Title, $scope.movie.Year);
-        })
-        .catch(function(error) {
-            $scope.errorMessage = 'Error loading movie details';
-            console.error('Error:', error);
-        });
+    // Fetch movie details
+    if (movieId) {
+        // Fetch by ID
+        $http.get(`/api/omdb/movie/${movieId}`)
+            .then(function(response) {
+                if (response.data.Response === "False") {
+                    throw new Error(response.data.Error || "Movie not found");
+                }
+                $scope.movie = response.data;
+                loadComments();
+                findMovieTrailer($scope.movie.Title, $scope.movie.Year);
+            })
+            .catch(function(error) {
+                $scope.errorMessage = 'Error loading movie details: ' + (error.message || error);
+                console.error('Error:', error);
+            });
+    } else {
+        // Fetch by title and year
+        let url = `/api/omdb/movie?title=${encodeURIComponent(movieTitle)}`;
+        if (movieYear) {
+            url += `&year=${movieYear}`;
+        }
+        
+        $http.get(url)
+            .then(function(response) {
+                if (response.data.Response === "False") {
+                    throw new Error(response.data.Error || "Movie not found");
+                }
+                $scope.movie = response.data;
+                loadComments();
+                findMovieTrailer($scope.movie.Title, $scope.movie.Year);
+            })
+            .catch(function(error) {
+                $scope.errorMessage = 'Error loading movie details: ' + (error.message || error);
+                console.error('Error:', error);
+            });
+    }
         
     // Function to find the movie trailer on YouTube
     function findMovieTrailer(title, year) {

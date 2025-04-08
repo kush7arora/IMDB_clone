@@ -10,8 +10,11 @@
       theme: {
         extend: {
           colors: {
-            'webflix-bg': 'rgb(51, 47, 36)',
-            'webflix-gold': 'rgb(219, 166, 20)',
+            'webflix-bg': '#1a0b2e', /* deep purple navy */
+            'webflix-accent': '#2fd8f2', /* bright teal/blue */
+            'webflix-dark': '#0d0521', /* darker purple for navigation */
+            'webflix-light': '#ffffff', /* white text */
+            'webflix-secondary': '#502d90' /* medium purple for elements */
           }
         }
       }
@@ -24,22 +27,22 @@
   <!-- Movie Details AngularJS App -->
   <script src="movieDetailsApp.js"></script>
 </head>
-<body class="bg-webflix-bg text-webflix-gold" ng-controller="MovieDetailsController">
+<body class="bg-webflix-bg text-webflix-light" ng-controller="MovieDetailsController">
   <!-- Sticky Header with Username and Logout -->
-  <div class="bg-black bg-opacity-80 shadow-md fixed top-0 left-0 right-0 z-10">
+  <div class="bg-webflix-dark bg-opacity-90 shadow-md fixed top-0 left-0 right-0 z-10">
     <div class="container mx-auto px-4 py-2 flex justify-between items-center">
       <div>
-        <h1 class="text-xl font-bold text-webflix-gold">WEBFLIX</h1>
+        <h1 class="text-xl font-bold text-webflix-accent">WEBFLIX</h1>
       </div>
       <div class="flex items-center">
-        <span class="text-webflix-gold mr-4">Welcome, {{ currentUser }}</span>
-        <button ng-click="goToMovies()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded mr-2 text-sm">
+        <span class="text-webflix-light mr-4">Welcome, {{ currentUser }}</span>
+        <button ng-click="goToMovies()" class="bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium px-3 py-1 rounded mr-2 text-sm">
           Browse Movies
         </button>
-        <button ng-click="goToWishlist()" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded mr-2 text-sm">
+        <button ng-click="goToWishlist()" class="bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium px-3 py-1 rounded mr-2 text-sm">
           My Wishlist
         </button>
-        <button ng-click="logout()" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm">
+        <button ng-click="logout()" class="bg-webflix-secondary hover:bg-opacity-80 text-webflix-light px-3 py-1 rounded text-sm">
           Logout
         </button>
       </div>
@@ -47,83 +50,83 @@
   </div>
 
   <div class="container mx-auto p-4 pt-16 mt-2">
-    <button onclick="window.history.back()" class="mb-4 bg-gray-700 hover:bg-gray-600 text-white p-2 rounded">Back</button>
+    <button onclick="window.history.back()" class="mb-4 bg-webflix-secondary hover:bg-opacity-80 text-webflix-light p-2 rounded">Back</button>
     
     <div ng-if="movie" class="flex flex-col md:flex-row gap-8">
       <!-- Left Column: Movie Details -->
-      <div class="bg-gray-900 shadow-md rounded-lg overflow-hidden max-w-sm mx-auto md:mx-0 border border-gray-800">
-        <div class="w-full flex items-center justify-center bg-black">
+      <div class="bg-webflix-secondary bg-opacity-30 shadow-md rounded-lg overflow-hidden max-w-sm mx-auto md:mx-0 border border-webflix-secondary">
+        <div class="w-full flex items-center justify-center bg-webflix-dark bg-opacity-50">
           <!-- Use OMDb Poster; if not available, use a placeholder -->
           <img class="w-full object-contain" 
                ng-src="{{ movie.Poster !== 'N/A' ? movie.Poster : 'placeholder.jpg' }}" 
                alt="{{ movie.Title }}">
         </div>
         <div class="p-4">
-          <h2 class="text-2xl font-bold mb-4 text-webflix-gold">{{ movie.Title }}</h2>
-          <p class="text-webflix-gold text-lg mb-2">IMDB Rating: {{ movie.imdbRating }}/10</p>
-          <p class="text-webflix-gold text-base mb-4">{{ movie.Plot }}</p>
-          <p class="text-webflix-gold text-sm mb-4">Released: {{ movie.Released }}</p>
-          <button ng-click="addToWishlist()" class="bg-red-600 hover:bg-red-700 text-white p-2 rounded w-full">
+          <h2 class="text-2xl font-bold mb-4 text-webflix-accent">{{ movie.Title }}</h2>
+          <p class="text-webflix-light text-lg mb-2">IMDB Rating: <span class="text-webflix-accent">{{ movie.imdbRating }}/10</span></p>
+          <p class="text-webflix-light text-base mb-4">{{ movie.Plot }}</p>
+          <p class="text-webflix-light text-sm mb-4">Released: {{ movie.Released }}</p>
+          <button ng-click="addToWishlist()" class="bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium p-2 rounded w-full">
             Add to Wishlist
           </button>
         </div>
       </div>
       
       <!-- Right Column: Comments, Rating, and Average Rating -->
-      <div class="bg-gray-900 shadow-md rounded-lg p-6 flex-1 border border-gray-800">
-        <h3 class="text-xl font-bold mb-4 text-webflix-gold">Comments & Ratings</h3>
+      <div class="bg-webflix-secondary bg-opacity-30 shadow-md rounded-lg p-6 flex-1 border border-webflix-secondary">
+        <h3 class="text-xl font-bold mb-4 text-webflix-accent">Comments & Ratings</h3>
         
         <!-- Display Average Rating -->
         <div class="mb-4">
-          <p class="text-webflix-gold font-semibold">Average Rating: {{ averageRating | number:1 }}/5 ({{ ratingsCount }} ratings)</p>
+          <p class="text-webflix-light font-semibold">Average Rating: <span class="text-webflix-accent">{{ averageRating | number:1 }}/5</span> ({{ ratingsCount }} ratings)</p>
         </div>
         
         <!-- Existing Comments -->
         <div ng-if="comments.length > 0" class="mb-4 max-h-64 overflow-y-auto">
-          <div ng-repeat="comment in comments" class="mb-2 p-2 border-b border-gray-800">
-            <p class="text-webflix-gold">
-              <strong>{{ comment.username }}</strong>
+          <div ng-repeat="comment in comments" class="mb-2 p-2 border-b border-webflix-secondary">
+            <p class="text-webflix-light">
+              <strong class="text-webflix-accent">{{ comment.username }}</strong>
               <span ng-if="comment.username === currentUser" class="text-red-500 text-sm ml-2">(You)</span>
               : {{ comment.text }}
             </p>
-            <p class="text-webflix-gold text-sm">Rating: {{ comment.rating }}/5</p>
+            <p class="text-webflix-light text-sm">Rating: <span class="text-webflix-accent">{{ comment.rating }}/5</span></p>
           </div>
         </div>
         <div ng-if="comments.length === 0" class="mb-4">
-          <p class="text-webflix-gold">No comments yet.</p>
+          <p class="text-webflix-light">No comments yet.</p>
         </div>
         
         <!-- Comment Form -->
         <form ng-submit="submitComment()" class="mt-4">
           <div class="mb-4">
-            <label class="block text-webflix-gold mb-2">Your Comment</label>
-            <textarea ng-model="newComment.text" class="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" rows="3" placeholder="Write your comment..."></textarea>
+            <label class="block text-webflix-accent mb-2">Your Comment</label>
+            <textarea ng-model="newComment.text" class="w-full p-2 border border-webflix-secondary rounded bg-webflix-dark bg-opacity-70 text-webflix-light" rows="3" placeholder="Write your comment..."></textarea>
           </div>
           <!-- Rating Buttons -->
           <div class="mb-4">
-            <label class="block text-webflix-gold mb-2">Your Rating</label>
+            <label class="block text-webflix-accent mb-2">Your Rating</label>
             <div class="flex space-x-2">
-              <button type="button" ng-click="selectRating(1)" class="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 text-white">1</button>
-              <button type="button" ng-click="selectRating(2)" class="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 text-white">2</button>
-              <button type="button" ng-click="selectRating(3)" class="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 text-white">3</button>
-              <button type="button" ng-click="selectRating(4)" class="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 text-white">4</button>
-              <button type="button" ng-click="selectRating(5)" class="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 text-white">5</button>
+              <button type="button" ng-click="selectRating(1)" class="px-3 py-1 rounded bg-webflix-secondary hover:bg-opacity-80 text-webflix-light">1</button>
+              <button type="button" ng-click="selectRating(2)" class="px-3 py-1 rounded bg-webflix-secondary hover:bg-opacity-80 text-webflix-light">2</button>
+              <button type="button" ng-click="selectRating(3)" class="px-3 py-1 rounded bg-webflix-secondary hover:bg-opacity-80 text-webflix-light">3</button>
+              <button type="button" ng-click="selectRating(4)" class="px-3 py-1 rounded bg-webflix-secondary hover:bg-opacity-80 text-webflix-light">4</button>
+              <button type="button" ng-click="selectRating(5)" class="px-3 py-1 rounded bg-webflix-secondary hover:bg-opacity-80 text-webflix-light">5</button>
             </div>
             <div class="mt-2" ng-if="newComment.rating">
-              <span class="text-webflix-gold">Selected Rating: {{ newComment.rating }}</span>
+              <span class="text-webflix-light">Selected Rating: <span class="text-webflix-accent">{{ newComment.rating }}</span></span>
             </div>
           </div>
-          <button type="submit" class="bg-red-600 hover:bg-red-700 text-white p-2 rounded w-full">
+          <button type="submit" class="bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium p-2 rounded w-full">
             Post Comment & Rating
           </button>
         </form>
         
         <!-- Movie Trailer Section -->
         <div class="mt-8">
-          <h3 class="text-xl font-bold mb-4 text-webflix-gold">Movie Trailer</h3>
+          <h3 class="text-xl font-bold mb-4 text-webflix-accent">Movie Trailer</h3>
           
           <div ng-if="trailerLoading" class="text-center py-4">
-            <p class="text-webflix-gold">Loading trailer...</p>
+            <p class="text-webflix-light">Loading trailer...</p>
           </div>
           
           <div ng-if="trailerUrl && !trailerLoading" class="relative" style="padding-bottom: 56.25%;">
@@ -137,7 +140,7 @@
           </div>
           
           <div ng-if="trailerSearchUrl && !trailerLoading" class="text-center py-2 mt-2">
-            <a ng-href="{{trailerSearchUrl}}" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+            <a ng-href="{{trailerSearchUrl}}" target="_blank" class="bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium px-4 py-2 rounded">
               Search for Trailer on YouTube
             </a>
           </div>

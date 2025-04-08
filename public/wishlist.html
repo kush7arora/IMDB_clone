@@ -10,8 +10,11 @@
       theme: {
         extend: {
           colors: {
-            'webflix-bg': 'rgb(51, 47, 36)',
-            'webflix-gold': 'rgb(219, 166, 20)',
+            'webflix-bg': '#1a0b2e', /* deep purple navy */
+            'webflix-accent': '#2fd8f2', /* bright teal/blue */
+            'webflix-dark': '#0d0521', /* darker purple for navigation */
+            'webflix-light': '#ffffff', /* white text */
+            'webflix-secondary': '#502d90' /* medium purple for elements */
           }
         }
       }
@@ -24,19 +27,19 @@
   <!-- Wishlist app script -->
   <script src="wishlistApp.js"></script>
 </head>
-<body class="bg-webflix-bg text-webflix-gold" ng-controller="WishlistController">
+<body class="bg-webflix-bg text-webflix-light" ng-controller="WishlistController">
   <!-- Sticky Header with Username and Logout -->
-  <div class="bg-black bg-opacity-80 shadow-md fixed top-0 left-0 right-0 z-10">
+  <div class="bg-webflix-dark bg-opacity-90 shadow-md fixed top-0 left-0 right-0 z-10">
     <div class="container mx-auto px-4 py-2 flex justify-between items-center">
       <div>
-        <h1 class="text-xl font-bold text-webflix-gold">WEBFLIX</h1>
+        <h1 class="text-xl font-bold text-webflix-accent">WEBFLIX</h1>
       </div>
       <div class="flex items-center">
-        <span class="text-webflix-gold mr-4">Welcome, {{ currentUser }}</span>
-        <button ng-click="goToMovies()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded mr-2 text-sm">
+        <span class="text-webflix-light mr-4">Welcome, {{ currentUser }}</span>
+        <button ng-click="goToMovies()" class="bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium px-3 py-1 rounded mr-2 text-sm">
           Back to Movies
         </button>
-        <button ng-click="logout()" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm">
+        <button ng-click="logout()" class="bg-webflix-secondary hover:bg-opacity-80 text-webflix-light px-3 py-1 rounded text-sm">
           Logout
         </button>
       </div>
@@ -44,17 +47,18 @@
   </div>
 
   <div class="container mx-auto p-4 pt-16 mt-2">
-    <h1 class="text-2xl font-bold mb-6 text-webflix-gold">My Wishlist</h1>
+    <h1 class="text-2xl font-bold mb-6 text-webflix-accent">My Wishlist</h1>
+    
     <!-- Wishlist Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div ng-repeat="movie in wishlist" class="bg-gray-900 shadow-md rounded-lg overflow-hidden border border-gray-800 hover:shadow-lg hover:border-gray-700 transition-all">
+      <div ng-repeat="movie in wishlist" class="bg-webflix-secondary bg-opacity-30 shadow-md rounded-lg overflow-hidden border border-webflix-secondary hover:shadow-lg hover:border-webflix-accent transition-all">
         <img ng-src="{{ movie.poster !== 'N/A' ? movie.poster : 'placeholder.jpg' }}" alt="{{ movie.title }}" class="w-full h-64 object-cover">
         <div class="p-4">
-          <h2 class="text-xl font-bold mb-2 text-webflix-gold">{{ movie.title }}</h2>
-          <p class="text-webflix-gold mb-3">{{ movie.year }}</p>
+          <h2 class="text-xl font-bold mb-2 text-webflix-accent">{{ movie.title }}</h2>
+          <p class="text-webflix-light mb-3">{{ movie.year }}</p>
           <div class="flex flex-col space-y-2">
-            <button ng-click="viewDetails(movie.movieId)" class="bg-red-600 hover:bg-red-700 text-white p-2 rounded">View Details</button>
-            <button ng-click="markAsWatched(movie.movieId)" class="bg-green-600 hover:bg-green-700 text-white p-2 rounded">
+            <button ng-click="viewDetails(movie.movieId)" class="bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium p-2 rounded">View Details</button>
+            <button ng-click="markAsWatched(movie.movieId)" class="bg-webflix-secondary hover:bg-opacity-80 text-webflix-light p-2 rounded border border-webflix-accent">
               Mark as Watched
             </button>
           </div>
@@ -62,9 +66,9 @@
       </div>
     </div>
     <!-- Empty Wishlist Message -->
-    <div ng-if="wishlist.length === 0" class="text-center p-8 bg-gray-900 rounded-lg border border-gray-800 mt-4">
-      <p class="text-webflix-gold text-lg">Your wishlist is empty.</p>
-      <button ng-click="goToMovies()" class="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+    <div ng-if="wishlist.length === 0" class="text-center p-8 bg-webflix-secondary bg-opacity-30 rounded-lg border border-webflix-secondary mt-4">
+      <p class="text-webflix-light text-lg">Your wishlist is empty.</p>
+      <button ng-click="goToMovies()" class="mt-4 bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium px-4 py-2 rounded">
         Browse Movies
       </button>
     </div>

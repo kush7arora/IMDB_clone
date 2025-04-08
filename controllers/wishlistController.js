@@ -90,14 +90,35 @@ exports.getWishlist = async (req, res) => {
   }
 };
 
-exports.removeFromWishlist = async (req, res) => {
+// Unified function to handle movie removal from wishlist
+// Works with both POST and DELETE requests
+exports.removeMovie = async (req, res) => {
   try {
+    console.log('removeMovie called, method:', req.method);
+    console.log('Body:', req.body);
+    console.log('Params:', req.params);
+    
     // Get user from cookie
     if (!req.cookies.user) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      console.error('No user cookie found in request');
+      return res.status(401).json({ message: 'Unauthorized', cookies: req.cookies });
     }
 
-    // Safely parse the user cookie
+    // Get movieId from either body (POST) or params (DELETE)
+    let movieId;
+    if (req.method === 'DELETE') {
+      movieId = req.params.movieId;
+    } else {
+      movieId = req.body.movieId;
+    }
+    
+    console.log('Extracted movieId:', movieId);
+    
+    if (!movieId) {
+      return res.status(400).json({ message: 'Movie ID is required' });
+    }
+    
+    // Parse the user cookie
     let userData;
     try {
       userData = JSON.parse(req.cookies.user);
@@ -108,32 +129,30 @@ exports.removeFromWishlist = async (req, res) => {
       console.error('Error parsing user cookie:', error);
       return res.status(401).json({ message: 'Invalid user session' });
     }
-
-    const userId = userData.id;
-    const { movieId } = req.params;
     
-    if (!movieId) {
-      return res.status(400).json({ message: 'Movie ID is required' });
-    }
-
-    // Remove movie from the wishlist array using $pull operator
+    const userId = userData.id;
+    console.log('Removing movie', movieId, 'for user', userId);
+    
+    // Update the user document
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { $pull: { wishlist: { movieId: movieId } } }, // Remove movie with matching movieId
+      { $pull: { wishlist: { movieId: movieId } } },
       { new: true }
     );
-
+    
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
     }
-
-    res.json({ 
-      message: 'Movie removed from wishlist', 
+    
+    console.log('Movie removed successfully');
+    
+    res.json({
+      message: 'Movie removed from wishlist',
       wishlist: updatedUser.wishlist,
       removed: movieId
     });
   } catch (error) {
-    console.error('Error removing movie from wishlist:', error);
+    console.error('Error in removeMovie:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

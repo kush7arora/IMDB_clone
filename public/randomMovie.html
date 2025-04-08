@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html ng-app="randomMovieApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Random Movie Selector - Webflix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'webflix-bg': '#1a0b2e', /* deep purple navy */
+              'webflix-accent': '#2fd8f2', /* bright teal/blue */
+              'webflix-dark': '#0d0521', /* darker purple for navigation */
+              'webflix-light': '#ffffff', /* white text */
+              'webflix-secondary': '#502d90' /* medium purple for elements */
+            }
+          }
+        }
+      }
+    </script>
+    <!-- AngularJS CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <!-- Angular Cookies CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-cookies.min.js"></script>
+    <!-- Random Movie app script -->
+    <script src="randomMovieApp.js"></script>
+</head>
+<body class="bg-webflix-bg min-h-screen" ng-controller="RandomMovieController">
+    <!-- Navbar -->
+    <nav class="bg-webflix-dark bg-opacity-90 text-webflix-light p-4 sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/movies" class="text-2xl font-bold text-webflix-accent">Webflix</a>
+            <div class="flex items-center space-x-4">
+                <span class="text-webflix-light">Welcome, {{currentUser}}</span>
+                <button ng-click="goToMovies()" class="bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium px-4 py-2 rounded mr-2">Movies</button>
+                <button ng-click="goToWishlist()" class="bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium px-4 py-2 rounded mr-2">My Wishlist</button>
+                <button ng-click="logout()" class="bg-webflix-secondary hover:bg-opacity-80 text-webflix-light px-4 py-2 rounded">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Movie Selection Form -->
+        <div class="max-w-2xl mx-auto bg-webflix-secondary bg-opacity-30 p-6 rounded-lg shadow-lg border border-webflix-secondary">
+            <h2 class="text-2xl font-bold text-webflix-accent mb-6">Find Your Next Movie</h2>
+            
+            <form name="movieForm" ng-submit="findRandomMovie()" novalidate class="space-y-4">
+                <!-- Genre Selection -->
+                <div>
+                    <label class="block text-webflix-accent mb-2">Genre</label>
+                    <select name="genre" ng-model="selectedGenre" required class="w-full p-2 bg-webflix-dark bg-opacity-70 text-webflix-light rounded border border-webflix-secondary">
+                        <option value="Action">Action</option>
+                        <option value="Drama">Drama</option>
+                        <option value="Comedy">Comedy</option>
+                        <option value="Sci-Fi">Sci-Fi</option>
+                        <option value="Thriller">Thriller</option>
+                    </select>
+                    <div class="text-red-400 text-sm mt-1" ng-show="movieForm.genre.$touched && movieForm.genre.$invalid">
+                        Please select a genre
+                    </div>
+                </div>
+
+                <!-- Duration Range -->
+                <div>
+                    <label class="block text-webflix-accent mb-2">Duration (minutes)</label>
+                    <div class="flex space-x-4">
+                        <input type="number" name="minDuration" ng-model="searchCriteria.minDuration" 
+                               min="0" max="300" required
+                               class="w-1/2 p-2 bg-webflix-dark bg-opacity-70 text-webflix-light rounded border border-webflix-secondary"
+                               placeholder="Min duration">
+                        <input type="number" name="maxDuration" ng-model="searchCriteria.maxDuration" 
+                               min="0" max="300" required
+                               class="w-1/2 p-2 bg-webflix-dark bg-opacity-70 text-webflix-light rounded border border-webflix-secondary"
+                               placeholder="Max duration">
+                    </div>
+                    <div class="text-red-400 text-sm mt-1" ng-show="movieForm.minDuration.$touched && movieForm.minDuration.$invalid">
+                        Please enter a valid duration (0-300 minutes)
+                    </div>
+                    <div class="text-red-400 text-sm mt-1" ng-show="movieForm.maxDuration.$touched && movieForm.maxDuration.$invalid">
+                        Please enter a valid duration (0-300 minutes)
+                    </div>
+                </div>
+
+                <!-- IMDb Rating -->
+                <div>
+                    <label class="block text-webflix-accent mb-2">Minimum IMDb Rating</label>
+                    <input type="number" name="rating" ng-model="searchCriteria.minRating" 
+                           min="0" max="10" step="0.1" required
+                           class="w-full p-2 bg-webflix-dark bg-opacity-70 text-webflix-light rounded border border-webflix-secondary">
+                    <div class="text-red-400 text-sm mt-1" ng-show="movieForm.rating.$touched && movieForm.rating.$invalid">
+                        Please enter a valid rating (0-10)
+                    </div>
+                </div>
+
+                <!-- Release Year Range -->
+                <div>
+                    <label class="block text-webflix-accent mb-2">Release Year</label>
+                    <div class="flex space-x-4">
+                        <input type="number" name="startYear" ng-model="searchCriteria.startYear" 
+                               min="1900" max="2024" required
+                               class="w-1/2 p-2 bg-webflix-dark bg-opacity-70 text-webflix-light rounded border border-webflix-secondary"
+                               placeholder="From year">
+                        <input type="number" name="endYear" ng-model="searchCriteria.endYear" 
+                               min="1900" max="2024" required
+                               class="w-1/2 p-2 bg-webflix-dark bg-opacity-70 text-webflix-light rounded border border-webflix-secondary"
+                               placeholder="To year">
+                    </div>
+                    <div class="text-red-400 text-sm mt-1" ng-show="movieForm.startYear.$touched && movieForm.startYear.$invalid">
+                        Please enter a valid year (1900-2024)
+                    </div>
+                    <div class="text-red-400 text-sm mt-1" ng-show="movieForm.endYear.$touched && movieForm.endYear.$invalid">
+                        Please enter a valid year (1900-2024)
+                    </div>
+                </div>
+
+                <button type="submit" 
+                        class="w-full bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium p-3 rounded"
+                        ng-disabled="movieForm.$invalid">
+                    Find Random Movie
+                </button>
+            </form>
+        </div>
+
+        <!-- Random Movie Card -->
+        <div ng-if="randomMovie" class="max-w-2xl mx-auto mt-8 bg-webflix-secondary bg-opacity-30 p-6 rounded-lg shadow-lg border border-webflix-secondary">
+            <div class="flex flex-col md:flex-row gap-6">
+                <div class="w-full md:w-64 h-96 flex items-center justify-center bg-webflix-dark bg-opacity-50 rounded overflow-hidden">
+                    <img ng-src="{{randomMovie.Poster}}" 
+                         alt="{{randomMovie.Title}}" 
+                         class="w-full h-full object-contain"
+                         onerror="this.src='https://via.placeholder.com/300x450?text=No+Poster'">
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-2xl font-bold text-webflix-accent mb-2">{{randomMovie.Title || 'Unknown Title'}}</h3>
+                    <p class="text-webflix-accent mb-2">{{randomMovie.Year || 'Unknown Year'}}</p>
+                    <p class="text-webflix-light mb-2">{{randomMovie.Plot || 'No plot available'}}</p>
+                    <div class="space-y-2">
+                        <p class="text-webflix-light"><span class="text-webflix-accent">Genre:</span> {{randomMovie.Genre || 'Unknown'}}</p>
+                        <p class="text-webflix-light"><span class="text-webflix-accent">Duration:</span> {{randomMovie.Runtime || 'Unknown'}}</p>
+                        <p class="text-webflix-light"><span class="text-webflix-accent">IMDb Rating:</span> <span class="font-bold">{{randomMovie.imdbRating}}</span>/10</p>
+                        <p class="text-webflix-light"><span class="text-webflix-accent">Director:</span> {{randomMovie.Director || 'Unknown'}}</p>
+                    </div>
+                    <div class="mt-4 flex space-x-4">
+                        <button ng-click="addToWishlist()" class="bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium px-4 py-2 rounded">
+                            Add to Wishlist
+                        </button>
+                        <button ng-click="viewDetails()" class="bg-webflix-secondary hover:bg-opacity-80 text-webflix-light px-4 py-2 rounded border border-webflix-accent">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div ng-if="isLoading" class="max-w-2xl mx-auto mt-8 p-6 bg-webflix-secondary bg-opacity-30 rounded-lg shadow-lg text-center border border-webflix-secondary">
+            <div class="flex flex-col items-center justify-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-webflix-accent mb-4"></div>
+                <p class="text-webflix-accent text-lg">Finding you a great movie...</p>
+                <p class="text-webflix-light text-sm mt-2">This will just take a moment.</p>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div ng-if="errorMessage" class="max-w-2xl mx-auto mt-4 p-4 bg-red-900 bg-opacity-30 text-red-400 rounded border border-red-500">
+            {{errorMessage}}
+            <div class="mt-3">
+                <button ng-click="findRandomMovie()" class="bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium px-4 py-2 rounded">
+                    Try Again
+                </button>
+            </div>
+        </div>
+        
+        <!-- Debug Info (hidden in production) -->
+        <div class="max-w-2xl mx-auto mt-4 p-4 bg-webflix-dark bg-opacity-50 text-webflix-light rounded text-xs border border-webflix-secondary">
+            <h4 class="font-bold mb-2 text-webflix-accent">Debug Info</h4>
+            <p>User: {{currentUser}}</p>
+            <p>Selected Genre: {{selectedGenre}}</p>
+            <p>Search Criteria: {{searchCriteria | json}}</p>
+            <p>Random Movie Object: {{randomMovie | json}}</p>
+            <p>isLoading: {{isLoading}}</p>
+        </div>
+    </div>
+</body>
+</html> 

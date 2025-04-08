@@ -10,8 +10,11 @@
       theme: {
         extend: {
           colors: {
-            'webflix-bg': 'rgb(51, 47, 36)',
-            'webflix-gold': 'rgb(219, 166, 20)',
+            'webflix-bg': '#1a0b2e', /* deep purple navy */
+            'webflix-accent': '#2fd8f2', /* bright teal/blue */
+            'webflix-dark': '#0d0521', /* darker purple for navigation */
+            'webflix-light': '#ffffff', /* white text */
+            'webflix-secondary': '#502d90' /* medium purple for elements */
           }
         }
       }
@@ -24,19 +27,22 @@
   <!-- Movies app script -->
   <script src="moviesApp.js"></script>
 </head>
-<body class="bg-webflix-bg text-webflix-gold" ng-controller="MoviesController">
+<body class="bg-webflix-bg text-webflix-light" ng-controller="MoviesController">
   <!-- Sticky Header with Username and Logout -->
-  <div class="bg-black bg-opacity-80 shadow-md fixed top-0 left-0 right-0 z-10">
+  <div class="bg-webflix-dark bg-opacity-90 shadow-md fixed top-0 left-0 right-0 z-10">
     <div class="container mx-auto px-4 py-2 flex justify-between items-center">
       <div>
-        <h1 class="text-xl font-bold text-webflix-gold">WEBFLIX</h1>
+        <h1 class="text-xl font-bold text-webflix-accent">WEBFLIX</h1>
       </div>
       <div class="flex items-center">
-        <span class="text-webflix-gold mr-4">Welcome, {{ currentUser }}</span>
-        <button ng-click="goToWishlist()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded mr-2 text-sm">
+        <span class="text-webflix-light mr-4">Welcome, {{ currentUser }}</span>
+        <button ng-click="goToRandomMovie()" class="bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium px-3 py-1 rounded mr-2 text-sm">
+          Random Movie
+        </button>
+        <button ng-click="goToWishlist()" class="bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium px-3 py-1 rounded mr-2 text-sm">
           My Wishlist
         </button>
-        <button ng-click="logout()" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm">
+        <button ng-click="logout()" class="bg-webflix-secondary hover:bg-opacity-80 text-webflix-light px-3 py-1 rounded text-sm">
           Logout
         </button>
       </div>
@@ -44,19 +50,19 @@
   </div>
 
   <div class="container mx-auto p-4 pt-16 mt-2">
-    <h1 class="text-2xl font-bold mb-6 text-webflix-gold text-center">Browse Movies</h1>
+    <h1 class="text-2xl font-bold mb-6 text-webflix-accent text-center">Browse Movies</h1>
     
     <!-- Search Bar - Centered and Narrower -->
     <div class="mb-6 flex justify-center">
       <div class="w-full max-w-md flex">
-        <input type="text" ng-model="searchTerm" placeholder="Search movies..." class="w-full p-2 border border-gray-700 rounded-l bg-gray-800 text-white">
-        <button ng-click="searchMovies()" class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-r whitespace-nowrap">Search</button>
+        <input type="text" ng-model="searchTerm" placeholder="Search movies..." class="w-full p-2 border border-webflix-secondary rounded-l bg-webflix-dark bg-opacity-70 text-webflix-light">
+        <button ng-click="searchMovies()" class="bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium p-2 rounded-r whitespace-nowrap">Search</button>
       </div>
     </div>
     
     <!-- Featured Random Movie -->
     <div class="mb-8 flex justify-center" ng-if="movies.length > 0">
-      <div class="w-4/5 bg-gray-900 shadow-md rounded-lg overflow-hidden border border-gray-800 hover:shadow-lg transition-all">
+      <div class="w-4/5 bg-webflix-secondary bg-opacity-30 shadow-md rounded-lg overflow-hidden border border-webflix-secondary hover:shadow-lg hover:border-webflix-accent transition-all">
         <div class="flex flex-col md:flex-row">
           <div class="md:w-2/5">
             <img ng-src="{{ randomMovie.Poster !== 'N/A' ? randomMovie.Poster : 'placeholder.jpg' }}" 
@@ -64,21 +70,21 @@
                 class="w-full h-full object-cover">
           </div>
           <div class="md:w-3/5 p-6">
-            <h2 class="text-3xl font-bold mb-4 text-webflix-gold">{{ randomMovie.Title }}</h2>
-            <p class="text-xl mb-4 text-webflix-gold">{{ randomMovie.Year }}</p>
-            <p class="text-webflix-gold mb-2">Featured Movie</p>
+            <h2 class="text-3xl font-bold mb-4 text-webflix-accent">{{ randomMovie.Title }}</h2>
+            <p class="text-xl mb-4 text-webflix-light">{{ randomMovie.Year }}</p>
+            <p class="text-webflix-accent mb-2">Featured Movie</p>
             <!-- Additional movie details -->
             <div class="mb-4" ng-if="randomMovieDetails">
-              <p class="text-webflix-gold mb-1"><span class="font-semibold">Director:</span> {{ randomMovieDetails.Director }}</p>
-              <p class="text-webflix-gold mb-1"><span class="font-semibold">Runtime:</span> {{ randomMovieDetails.Runtime }}</p>
-              <p class="text-webflix-gold mb-1"><span class="font-semibold">Genre:</span> {{ randomMovieDetails.Genre }}</p>
-              <p class="text-webflix-gold mb-1"><span class="font-semibold">Plot:</span> {{ randomMovieDetails.Plot }}</p>
+              <p class="text-webflix-light mb-1"><span class="font-semibold text-webflix-accent">Director:</span> {{ randomMovieDetails.Director }}</p>
+              <p class="text-webflix-light mb-1"><span class="font-semibold text-webflix-accent">Runtime:</span> {{ randomMovieDetails.Runtime }}</p>
+              <p class="text-webflix-light mb-1"><span class="font-semibold text-webflix-accent">Genre:</span> {{ randomMovieDetails.Genre }}</p>
+              <p class="text-webflix-light mb-1"><span class="font-semibold text-webflix-accent">Plot:</span> {{ randomMovieDetails.Plot }}</p>
             </div>
             <div class="flex space-x-4">
-              <button ng-click="viewDetails(randomMovie.imdbID)" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+              <button ng-click="viewDetails(randomMovie.imdbID)" class="bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium px-4 py-2 rounded">
                 View Details
               </button>
-              <button ng-click="addToWishlist(randomMovie)" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded">
+              <button ng-click="addToWishlist(randomMovie)" class="bg-webflix-secondary hover:bg-opacity-80 text-webflix-light px-4 py-2 rounded border border-webflix-accent">
                 Add to Wishlist
               </button>
             </div>
@@ -87,15 +93,23 @@
       </div>
     </div>
     
+    <!-- Random Movie Generator Call-to-Action -->
+    <div class="mb-8 text-center">
+      <p class="text-webflix-light mb-3">Looking for something specific? Try our advanced Random Movie Generator!</p>
+      <button ng-click="goToRandomMovie()" class="bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium px-6 py-3 rounded-lg">
+        Find Your Perfect Movie
+      </button>
+    </div>
+    
     <!-- Movies Grid -->
-    <h2 class="text-xl font-bold mb-4 text-webflix-gold">All Movies</h2>
+    <h2 class="text-xl font-bold mb-4 text-webflix-accent">All Movies</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div ng-repeat="movie in movies" class="bg-gray-900 shadow-md rounded-lg overflow-hidden border border-gray-800 hover:shadow-lg hover:border-gray-700 transition-all">
+      <div ng-repeat="movie in movies" class="bg-webflix-secondary bg-opacity-30 shadow-md rounded-lg overflow-hidden border border-webflix-secondary hover:shadow-lg hover:border-webflix-accent transition-all">
         <img ng-src="{{ movie.Poster !== 'N/A' ? movie.Poster : 'placeholder.jpg' }}" alt="{{ movie.Title }}" class="w-full h-64 object-cover">
         <div class="p-4">
-          <h2 class="text-xl font-bold mb-2 text-webflix-gold">{{ movie.Title }}</h2>
-          <p class="text-webflix-gold">{{ movie.Year }}</p>
-          <button ng-click="viewDetails(movie.imdbID)" class="mt-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded w-full">View Details</button>
+          <h2 class="text-xl font-bold mb-2 text-webflix-accent">{{ movie.Title }}</h2>
+          <p class="text-webflix-light">{{ movie.Year }}</p>
+          <button ng-click="viewDetails(movie.imdbID)" class="mt-2 bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium p-2 rounded w-full">View Details</button>
         </div>
       </div>
     </div>
