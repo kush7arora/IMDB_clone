@@ -1,12 +1,16 @@
 // config/session.js
 const session = require('express-session');
+require('dotenv').config();
 
 const sessionConfig = session({
-  secret: '23BIT0002@kushArora', // use a strong secret in production
+  secret: process.env.SESSION_SECRET, // use a strong secret in production
   resave: false,
   saveUninitialized: false,
   cookie: {
     maxAge: 1000 * 60 * 60, 
+    httpOnly: true, // Secure cookies
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax'
   },
 });
 

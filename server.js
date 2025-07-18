@@ -10,6 +10,7 @@ const app = express();
 const movieRoutes = require('./routes/movieRoutes');
 const cors = require('cors');
 const axios = require('axios');
+require('dotenv').config(); // Ensure dotenv is loaded
 
 // Connect to MongoDB
 connectDB();
@@ -20,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(sessionConfig);
 app.use(cors({
-  origin: 'http://localhost:5050',
+  origin: process.env.CLIENT_ORIGIN,
   credentials: true
 }));
 
@@ -46,7 +47,7 @@ app.get('/api/proxy/movies', async (req, res) => {
     }
     
     console.log(`Searching OMDB API with query: ${searchQuery}${yearParam}`);
-    const response = await axios.get(`http://www.omdbapi.com/?apikey=228b48c4&s=${encodeURIComponent(searchQuery)}${yearParam}`);
+    const response = await axios.get(`http://www.omdbapi.com/?apikey=${process.env.OMDB_API_KEY}&s=${encodeURIComponent(searchQuery)}${yearParam}`);
     res.json(response.data);
   } catch (error) {
     console.error('Error fetching movies:', error);
@@ -57,7 +58,7 @@ app.get('/api/proxy/movies', async (req, res) => {
 app.get('/api/proxy/movie', async (req, res) => {
   try {
     const id = req.query.id;
-    const response = await axios.get(`http://www.omdbapi.com/?apikey=228b48c4&i=${id}`);
+    const response = await axios.get(`http://www.omdbapi.com/?apikey=${process.env.OMDB_API_KEY}&i=${id}`);
     res.json(response.data);
   } catch (error) {
     console.error('Error fetching movie details:', error);
@@ -71,7 +72,7 @@ app.get('/api/tmdb/discover', async (req, res) => {
     const { genre, minDuration, maxDuration, minRating, startYear, endYear, page = 1 } = req.query;
     
     // TMDb API key
-    const tmdbApiKey = '2e1ee69b814f88e54efdef84927bc4b3';
+    const tmdbApiKey = process.env.TMDB_API_KEY;
     
     // Map frontend genre names to TMDb genre IDs
     const genreMap = {
@@ -145,7 +146,7 @@ app.get('/api/tmdb/discover', async (req, res) => {
 app.get('/api/tmdb/movie', async (req, res) => {
   try {
     const { id } = req.query;
-    const tmdbApiKey = '2e1ee69b814f88e54efdef84927bc4b3';
+    const tmdbApiKey = process.env.TMDB_API_KEY;
     const response = await axios.get(`https://api.themoviedb.org/3/movie/${id}?api_key=${tmdbApiKey}&language=en-US&append_to_response=credits`);
     res.json(response.data);
   } catch (error) {
@@ -158,7 +159,7 @@ app.get('/api/tmdb/movie', async (req, res) => {
 app.get('/api/omdb/movie/:id', async (req, res) => {
   try {
     const id = req.params.id;
-    const response = await axios.get(`http://www.omdbapi.com/?apikey=228b48c4&i=${id}`);
+    const response = await axios.get(`http://www.omdbapi.com/?apikey=${process.env.OMDB_API_KEY}&i=${id}`);
     res.json(response.data);
   } catch (error) {
     console.error('Error fetching movie details:', error);
@@ -174,7 +175,7 @@ app.get('/api/omdb/movie', async (req, res) => {
       return res.status(400).json({ error: 'Title is required' });
     }
     
-    let queryUrl = `http://www.omdbapi.com/?apikey=228b48c4&t=${encodeURIComponent(title)}`;
+    let queryUrl = `http://www.omdbapi.com/?apikey=${process.env.OMDB_API_KEY}&t=${encodeURIComponent(title)}`;
     if (year) {
       queryUrl += `&y=${year}`;
     }
