@@ -34,7 +34,7 @@ angular.module('imdbApp', ['ngCookies'])
         $scope.randomMovie = $scope.movies[randomIndex];
         
         // Fetch detailed information for the random movie
-        $http.get(`/api/proxy/movie?id=${$scope.randomMovie.imdbID}`)
+        $http.get(`/api/proxy/movie?id=${$scope.randomMovie.imdbID}`, { withCredentials: true })
           .then(function(response) {
             if (response.data.Response === "True") {
               $scope.randomMovieDetails = response.data;
@@ -66,7 +66,7 @@ angular.module('imdbApp', ['ngCookies'])
         return;
       }
 
-      $http.get(`/api/proxy/movies?query=${encodeURIComponent($scope.searchTerm)}`)
+      $http.get(`/api/proxy/movies?query=${encodeURIComponent($scope.searchTerm)}`, { withCredentials: true })
         .then(function(response) {
           if (response.data.Response === "True") {
             $scope.movies = response.data.Search;
@@ -91,7 +91,7 @@ angular.module('imdbApp', ['ngCookies'])
         title: movie.Title,
         year: movie.Year,
         poster: movie.Poster
-      })
+      }, { withCredentials: true })
       .then(function(response) {
         alert('Movie added to wishlist!');
       })
@@ -114,7 +114,7 @@ angular.module('imdbApp', ['ngCookies'])
 
     // Load default movies on page load
     $scope.loadDefaultMovies = function() {
-      $http.get(`/api/proxy/movies?query=star`)
+      $http.get(`/api/proxy/movies?query=star`, { withCredentials: true })
         .then(function(response) {
           if (response.data.Response === "True") {
             $scope.movies = response.data.Search;

@@ -5,7 +5,7 @@ angular.module('imdbApp', [])
     $scope.errorMessage = '';
 
     $scope.signup = function() {
-      $http.post('/api/auth/signup', $scope.signupData)
+      $http.post('/api/auth/signup', $scope.signupData, { withCredentials: true })
         .then(function(response) {
           // Redirect to movies page on successful signup (or to login page, as needed)
           window.location.href = "/movies";
