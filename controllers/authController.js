@@ -25,8 +25,8 @@ exports.signup = async (req, res) => {
     res.cookie('user', JSON.stringify(userData), { 
       path: '/',
       httpOnly: false, // Allow JavaScript access
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax'
+      secure: true, // Always true in production for cross-site
+      sameSite: 'None' // Required for cross-site cookies
     });
     
     res.status(201).json({ message: 'User created successfully' });
@@ -57,8 +57,8 @@ exports.login = async (req, res) => {
     res.cookie('user', JSON.stringify(userData), { 
       path: '/',
       httpOnly: false, // Allow JavaScript access
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax'
+      secure: true, // Always true in production for cross-site
+      sameSite: 'None' // Required for cross-site cookies
     });
     
     return res.json({ message: 'Login successful' });
