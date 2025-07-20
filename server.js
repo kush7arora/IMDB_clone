@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(sessionConfig);
 app.use(cors({
-  origin: process.env.CLIENT_ORIGIN,
+  origin: process.env.CLIENT_ORIGIN, // Should be 'https://webflix-s6lm.onrender.com'
   credentials: true
 }));
 

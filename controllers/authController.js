@@ -22,10 +22,10 @@ exports.signup = async (req, res) => {
     
     // Set user cookie with full user object
     const userData = { id: newUser._id, username: newUser.username };
-    res.cookie('user', JSON.stringify(userData), { 
+    res.cookie('user', JSON.stringify(userData), {
       path: '/',
       httpOnly: false, // Allow JavaScript access
-      secure: true, // Always true in production for cross-site
+      secure: true, // Always true for production/cross-site
       sameSite: 'None' // Required for cross-site cookies
     });
     
@@ -54,10 +54,10 @@ exports.login = async (req, res) => {
     
     // Set user cookie with full user object
     const userData = { id: user._id, username: user.username };
-    res.cookie('user', JSON.stringify(userData), { 
+    res.cookie('user', JSON.stringify(userData), {
       path: '/',
       httpOnly: false, // Allow JavaScript access
-      secure: true, // Always true in production for cross-site
+      secure: true, // Always true for production/cross-site
       sameSite: 'None' // Required for cross-site cookies
     });
     
