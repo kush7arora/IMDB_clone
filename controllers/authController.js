@@ -24,7 +24,7 @@ exports.signup = async (req, res) => {
     const userData = { id: newUser._id, username: newUser.username };
     res.cookie('user', JSON.stringify(userData), {
       path: '/',
-      httpOnly: true, // Allow JavaScript access
+      httpOnly: false, // Allow JavaScript access
       secure: true, // Always true for production/cross-site
       sameSite: 'None' // Required for cross-site cookies
     });
