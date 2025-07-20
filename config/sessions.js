@@ -8,8 +8,8 @@ const sessionConfig = session({
   saveUninitialized: false,
   cookie: {
     maxAge: 1000 * 60 * 60, 
-    httpOnly: true, // Secure cookies
-    secure: process.env.NODE_ENV === 'production',
+    httpOnly: false, // Secure cookies
+    secure: true,
     sameSite: 'lax'
   },
 });
