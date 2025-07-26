@@ -67,7 +67,7 @@ exports.signup = async (req, res) => {
     
     
     const userData = { id: newUser._id, username: newUser.username };
-    res.cookie('user', JSON.stringify(userData), { 
+    res.cookie('user', JSON.stringify(userData), {
       path: '/',
       httpOnly: false, 
       secure: process.env.NODE_ENV === 'production',
@@ -100,7 +100,7 @@ exports.login = async (req, res) => {
     
    
     const userData = { id: user._id, username: user.username };
-    res.cookie('user', JSON.stringify(userData), { 
+    res.cookie('user', JSON.stringify(userData), {
       path: '/',
       httpOnly: false, 
       secure: process.env.NODE_ENV === 'production',

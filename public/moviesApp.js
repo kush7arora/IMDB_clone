@@ -34,8 +34,7 @@ angular.module('imdbApp', ['ngCookies'])
         $scope.randomMovie = $scope.movies[randomIndex];
         
         // Fetch detailed information for the random movie
-        const apiKey = '228b48c4';
-        $http.get(`http://www.omdbapi.com/?i=${$scope.randomMovie.imdbID}&apikey=${apiKey}`)
+        $http.get(`/api/proxy/movie?id=${$scope.randomMovie.imdbID}`, { withCredentials: true })
           .then(function(response) {
             if (response.data.Response === "True") {
               $scope.randomMovieDetails = response.data;
@@ -93,7 +92,7 @@ angular.module('imdbApp', ['ngCookies'])
         title: movie.Title,
         year: movie.Year,
         poster: movie.Poster
-      })
+      }, { withCredentials: true })
       .then(function(response) {
         alert('Movie added to wishlist!');
       })
@@ -116,8 +115,7 @@ angular.module('imdbApp', ['ngCookies'])
 
     // Load default movies on page load
     $scope.loadDefaultMovies = function() {
-      const apiKey = '228b48c4';
-      $http.get(`http://www.omdbapi.com/?s=star&apikey=${apiKey}`)
+      $http.get(`/api/proxy/movies?query=star`, { withCredentials: true })
         .then(function(response) {
           if (response.data.Response === "True") {
             $scope.movies = response.data.Search;
