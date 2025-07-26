@@ -1,7 +1,7 @@
 var app = angular.module('profileApp', ['ngCookies']);
 
 app.controller('ProfileController', function($scope, $http, $cookies, $window) {
-  // Check if user is logged in
+  
   var userCookie = $cookies.get('user');
   if (!userCookie) {
     $window.location.href = '/signup';
@@ -9,10 +9,10 @@ app.controller('ProfileController', function($scope, $http, $cookies, $window) {
   }
 
   try {
-    // Parse user data from cookie
+    
     $scope.currentUser = JSON.parse(userCookie);
     
-    // Verify user data is valid
+    
     if (!$scope.currentUser || !$scope.currentUser.username) {
       throw new Error('Invalid user data');
     }
@@ -23,7 +23,7 @@ app.controller('ProfileController', function($scope, $http, $cookies, $window) {
     return;
   }
 
-  // Logout function
+  
   $scope.logout = function() {
     $http.post('/api/auth/logout')
       .then(function(response) {

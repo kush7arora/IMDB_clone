@@ -1,14 +1,14 @@
-// controllers/wishlistController.js
+
 const User = require('../models/user');
 
 exports.addToWishlist = async (req, res) => {
   try {
-    // Get user from cookie
+  
     if (!req.cookies.user) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    // Safely parse the user cookie
+    
     let userData;
     try {
       userData = JSON.parse(req.cookies.user);
@@ -21,9 +21,9 @@ exports.addToWishlist = async (req, res) => {
     }
 
     const userId = userData.id;
-    const movieData = req.body; // The movie details sent from the client
+    const movieData = req.body; 
 
-    // Handle both lowercase and uppercase field names from the frontend
+    
     const movie = {
       movieId: movieData.movieId || movieData.imdbID,
       title: movieData.title || movieData.Title,
@@ -31,7 +31,7 @@ exports.addToWishlist = async (req, res) => {
       poster: movieData.poster || movieData.Poster
     };
 
-    // Validate movie data
+    
     if (!movie.movieId || !movie.title) {
       return res.status(400).json({ 
         message: 'Invalid movie data',
@@ -39,10 +39,10 @@ exports.addToWishlist = async (req, res) => {
       });
     }
 
-    // Add movie to the wishlist array (avoid duplicates if needed)
+    
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { $addToSet: { wishlist: movie } }, // Use $addToSet to avoid duplicates
+      { $addToSet: { wishlist: movie } }, 
       { new: true }
     );
 
@@ -59,12 +59,12 @@ exports.addToWishlist = async (req, res) => {
 
 exports.getWishlist = async (req, res) => {
   try {
-    // Get user from cookie
+    
     if (!req.cookies.user) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    // Safely parse the user cookie
+    
     let userData;
     try {
       userData = JSON.parse(req.cookies.user);
@@ -90,21 +90,20 @@ exports.getWishlist = async (req, res) => {
   }
 };
 
-// Unified function to handle movie removal from wishlist
-// Works with both POST and DELETE requests
+
 exports.removeMovie = async (req, res) => {
   try {
     console.log('removeMovie called, method:', req.method);
     console.log('Body:', req.body);
     console.log('Params:', req.params);
     
-    // Get user from cookie
+    
     if (!req.cookies.user) {
       console.error('No user cookie found in request');
       return res.status(401).json({ message: 'Unauthorized', cookies: req.cookies });
     }
 
-    // Get movieId from either body (POST) or params (DELETE)
+    
     let movieId;
     if (req.method === 'DELETE') {
       movieId = req.params.movieId;
@@ -118,7 +117,7 @@ exports.removeMovie = async (req, res) => {
       return res.status(400).json({ message: 'Movie ID is required' });
     }
     
-    // Parse the user cookie
+    
     let userData;
     try {
       userData = JSON.parse(req.cookies.user);
@@ -133,7 +132,7 @@ exports.removeMovie = async (req, res) => {
     const userId = userData.id;
     console.log('Removing movie', movieId, 'for user', userId);
     
-    // Update the user document
+    
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $pull: { wishlist: { movieId: movieId } } },

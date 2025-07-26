@@ -5,17 +5,16 @@ angular.module('wishlistApp', ['ngCookies'])
     
     console.log('Initializing WishlistController');
     
-    // Debug cookie content
+    
     console.log('Cookie exists:', !!$cookies.get('user'));
     
-    // Check if user is logged in
     if (!$cookies.get('user')) {
       console.log('No user cookie found, redirecting to signup');
       $window.location.href = '/signup';
       return;
     }
 
-    // Get user data from cookie with error handling
+    
     try {
       const userData = JSON.parse($cookies.get('user'));
       console.log('User data from cookie:', userData);
@@ -33,12 +32,12 @@ angular.module('wishlistApp', ['ngCookies'])
       return;
     }
 
-    // Navigation functions
+    
     $scope.goToMovies = function() {
       $window.location.href = '/movies';
     };
 
-    // Test cookie access function
+    
     $scope.testCookie = function() {
       $scope.debugInfo = {
         cookieExists: !!$cookies.get('user'),
@@ -55,7 +54,7 @@ angular.module('wishlistApp', ['ngCookies'])
         $scope.debugInfo.error = error.message;
       }
       
-      // Test direct API call
+      
       $http.get('/api/wishlist/test-auth', { withCredentials: true })
         .then(response => {
           $scope.debugInfo.apiResponse = response.data;
@@ -65,12 +64,12 @@ angular.module('wishlistApp', ['ngCookies'])
         });
     };
 
-    // View movie details function
+    
     $scope.viewDetails = function(movieId) {
       $window.location.href = '/movie-details?id=' + movieId;
     };
 
-    // Mark movie as watched (removes from wishlist)
+    
     $scope.markAsWatched = function(movieId) {
       console.log('Marking movie as watched, movieId:', movieId);
       
@@ -80,14 +79,14 @@ angular.module('wishlistApp', ['ngCookies'])
         return;
       }
       
-      // Use POST with method override instead of direct DELETE - more compatible
+      
       console.log('Sending POST request to /api/wishlist/remove with movieId:', movieId);
       
       $http({
         method: 'POST',
         url: '/api/wishlist/remove',
         data: { movieId: movieId },
-        withCredentials: true,  // Ensure cookies are sent with request
+        withCredentials: true,  
         headers: {
           'Content-Type': 'application/json'
         }

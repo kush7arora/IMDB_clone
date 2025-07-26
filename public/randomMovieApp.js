@@ -77,7 +77,8 @@ app.controller('RandomMovieController', function($scope, $http, $cookies, $windo
                 startYear: $scope.searchCriteria.startYear,
                 endYear: $scope.searchCriteria.endYear,
                 page: Math.floor(Math.random() * 5) + 1 // Get a random page from first 5 pages
-            }
+            },
+            timeout: 10000 // 10 second timeout
         })
         .then(function(response) {
             console.log('TMDb search response:', response.data);
@@ -135,11 +136,6 @@ app.controller('RandomMovieController', function($scope, $http, $cookies, $windo
                             imdbRating: movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A',
                             Director: director
                         };
-                        
-                        // Force Angular to update the view
-                        if(!$scope.$$phase) {
-                            $scope.$apply();
-                        }
                     })
                     .catch(function(error) {
                         console.error('Error fetching movie details:', error);
@@ -147,32 +143,17 @@ app.controller('RandomMovieController', function($scope, $http, $cookies, $windo
                     })
                     .finally(function() {
                         $scope.isLoading = false;
-                        
-                        // Ensure Angular UI updates
-                        if(!$scope.$$phase) {
-                            $scope.$apply();
-                        }
                     });
                 
             } else {
                 $scope.errorMessage = 'No movies found matching your criteria. Try broadening your search.';
                 $scope.isLoading = false;
-                
-                // Ensure Angular UI updates
-                if(!$scope.$$phase) {
-                    $scope.$apply();
-                }
             }
         })
         .catch(function(error) {
             console.error('Error searching for movies:', error);
             $scope.errorMessage = 'Error searching for movies. Please try again.';
             $scope.isLoading = false;
-            
-            // Ensure Angular UI updates
-            if(!$scope.$$phase) {
-                $scope.$apply();
-            }
         });
     };
     

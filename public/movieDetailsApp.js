@@ -1,6 +1,5 @@
 var app = angular.module('movieDetailsApp', ['ngCookies']);
 
-// Add a filter to make URLs trusted for iframe src
 app.filter('trusted', ['$sce', function ($sce) {
     return function(url) {
         return $sce.trustAsResourceUrl(url);
@@ -8,13 +7,13 @@ app.filter('trusted', ['$sce', function ($sce) {
 }]);
 
 app.controller('MovieDetailsController', function($scope, $http, $cookies, $window) {
-    // Check if user is logged in
+    
     if (!$cookies.get('user')) {
         $window.location.href = '/signup';
         return;
     }
 
-    // Get user data from cookie with error handling
+    
     try {
         const userData = JSON.parse($cookies.get('user'));
         if (!userData || !userData.username) {
@@ -28,12 +27,12 @@ app.controller('MovieDetailsController', function($scope, $http, $cookies, $wind
         return;
     }
     
-    // Initialize new comment object
+    
     $scope.newComment = { text: '', rating: null };
     $scope.trailerUrl = null;
     $scope.trailerLoading = false;
 
-    // Navigation functions
+    
     $scope.goToMovies = function() {
         $window.location.href = '/movies';
     };
@@ -42,7 +41,7 @@ app.controller('MovieDetailsController', function($scope, $http, $cookies, $wind
         $window.location.href = '/wishlist';
     };
 
-    // Get movie ID from URL
+    
     const urlParams = new URLSearchParams(window.location.search);
     const movieId = urlParams.get('id');
     const movieTitle = urlParams.get('title');
@@ -53,7 +52,7 @@ app.controller('MovieDetailsController', function($scope, $http, $cookies, $wind
         return;
     }
 
-    // Fetch movie details
+    
     if (movieId) {
         // Fetch by ID
         $http.get(`/api/omdb/movie/${movieId}`)
@@ -70,7 +69,7 @@ app.controller('MovieDetailsController', function($scope, $http, $cookies, $wind
                 console.error('Error:', error);
             });
     } else {
-        // Fetch by title and year
+        
         let url = `/api/omdb/movie?title=${encodeURIComponent(movieTitle)}`;
         if (movieYear) {
             url += `&year=${movieYear}`;
@@ -91,13 +90,13 @@ app.controller('MovieDetailsController', function($scope, $http, $cookies, $wind
             });
     }
         
-    // Function to find the movie trailer on YouTube
+    
     function findMovieTrailer(title, year) {
         $scope.trailerLoading = true;
         
-        // Create mapping of movie titles to known trailer video IDs
+
         const knownTrailers = {
-            // Popular movies with verified trailer IDs
+            
             'the shawshank redemption': 'PLl99DlL6b4',
             'the godfather': '6hOHvyw6Qia',
             'the dark knight': 'EXeTwQWrcwY',

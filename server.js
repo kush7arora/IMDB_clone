@@ -1,4 +1,4 @@
-// server.js
+
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
@@ -11,10 +11,10 @@ const movieRoutes = require('./routes/movieRoutes');
 const cors = require('cors');
 const axios = require('axios');
 
-// Connect to MongoDB
+
 connectDB();
 
-// Middleware
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -24,24 +24,23 @@ app.use(cors({
   credentials: true
 }));
 
-// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/movies', movieRoutes);
 
-// Proxy routes for OMDB API
+
 app.get('/api/proxy/movies', async (req, res) => {
   try {
     const query = req.query.query;
-    // Extract year range from the query
+  
     const yearMatch = query.match(/(\d{4})-(\d{4})/);
     let searchQuery = query;
     let yearParam = '';
     
     if (yearMatch) {
-      // Remove the year range from the search query
+    
       searchQuery = query.replace(/\d{4}-\d{4}/, '').trim();
-      // Use the start year for the search
+    
       yearParam = `&y=${yearMatch[1]}`;
     }
     
@@ -65,7 +64,6 @@ app.get('/api/proxy/movie', async (req, res) => {
   }
 });
 
-// TMDb API proxy for random movie generator
 app.get('/api/tmdb/discover', async (req, res) => {
   try {
     const { genre, minDuration, maxDuration, minRating, startYear, endYear, page = 1 } = req.query;
@@ -73,7 +71,7 @@ app.get('/api/tmdb/discover', async (req, res) => {
     // TMDb API key
     const tmdbApiKey = '2e1ee69b814f88e54efdef84927bc4b3';
     
-    // Map frontend genre names to TMDb genre IDs
+  
     const genreMap = {
       'Action': '28',
       'Drama': '18',
@@ -82,49 +80,49 @@ app.get('/api/tmdb/discover', async (req, res) => {
       'Thriller': '53'
     };
     
-    // Convert genre name to TMDb genre ID
-    const genreId = genreMap[genre] || '28'; // Default to Action if not found
     
-    // Convert minRating to TMDb's 10-point scale if needed
+    const genreId = genreMap[genre] || '28'; 
+    
+    
     const tmdbMinRating = parseFloat(minRating || 0);
     
-    // Use broader criteria for runtime to ensure we get results
+  
     const minRuntime = Math.max(1, parseInt(minDuration || 60));
     const maxRuntime = parseInt(maxDuration || 240);
     
-    // Add a minimum vote count to ensure we get well-known/famous movies
-    const minVoteCount = 1000; // Famous movies typically have 1000+ votes
     
-    // Build the TMDb API URL with all parameters, including minimum vote count
+    const minVoteCount = 1000; 
+    
+    
     const url = `https://api.themoviedb.org/3/discover/movie?api_key=${tmdbApiKey}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&with_genres=${genreId}&vote_average.gte=${tmdbMinRating}&primary_release_date.gte=${startYear}-01-01&primary_release_date.lte=${endYear}-12-31&with_runtime.gte=${minRuntime}&with_runtime.lte=${maxRuntime}&vote_count.gte=${minVoteCount}&page=${page}`;
     
     console.log(`Searching TMDb API: Genre=${genre}, Rating>=${tmdbMinRating}, Years=${startYear}-${endYear}, Duration=${minRuntime}-${maxRuntime} min, Page=${page}, Min Votes=${minVoteCount}`);
     console.log(`Request URL: ${url}`);
     
-    const response = await axios.get(url);
+    const response = await axios.get(url, { timeout: 5000 }); // 5 second timeout
     
-    // Log the first result for debugging
+    
     if (response.data.results && response.data.results.length > 0) {
       console.log(`Found ${response.data.results.length} popular movies. First movie: ${response.data.results[0].title}`);
     } else {
       console.log('No movies found matching criteria with minimum vote count');
       
-      // Fallback: Try without the minimum vote count requirement
+    
       console.log('Trying without minimum vote count requirement...');
       const fallbackUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${tmdbApiKey}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&with_genres=${genreId}&vote_average.gte=${tmdbMinRating}&primary_release_date.gte=${startYear}-01-01&primary_release_date.lte=${endYear}-12-31&with_runtime.gte=${minRuntime}&with_runtime.lte=${maxRuntime}&page=${page}`;
       
-      const fallbackResponse = await axios.get(fallbackUrl);
+      const fallbackResponse = await axios.get(fallbackUrl, { timeout: 5000 }); // 5 second timeout
       if (fallbackResponse.data.results && fallbackResponse.data.results.length > 0) {
         console.log(`Found ${fallbackResponse.data.results.length} movies without vote count restriction. First movie: ${fallbackResponse.data.results[0].title}`);
         res.json(fallbackResponse.data);
         return;
       } else {
-        // If still no results, try without runtime restrictions
+      
         if (minRuntime > 1 || maxRuntime < 240) {
           console.log('Trying without runtime restrictions...');
           const secondFallbackUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${tmdbApiKey}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&with_genres=${genreId}&vote_average.gte=${tmdbMinRating}&primary_release_date.gte=${startYear}-01-01&primary_release_date.lte=${endYear}-12-31&page=${page}`;
           
-          const secondFallbackResponse = await axios.get(secondFallbackUrl);
+          const secondFallbackResponse = await axios.get(secondFallbackUrl, { timeout: 5000 }); // 5 second timeout
           if (secondFallbackResponse.data.results && secondFallbackResponse.data.results.length > 0) {
             console.log(`Found ${secondFallbackResponse.data.results.length} movies without runtime and vote restrictions. First movie: ${secondFallbackResponse.data.results[0].title}`);
             res.json(secondFallbackResponse.data);
@@ -137,16 +135,35 @@ app.get('/api/tmdb/discover', async (req, res) => {
     res.json(response.data);
   } catch (error) {
     console.error('Error fetching movies from TMDb:', error);
-    res.status(500).json({ error: 'Failed to fetch movies from TMDb' });
+    if (error.code === 'ECONNABORTED') {
+      res.status(504).json({ error: 'Request to TMDb API timed out' });
+    } else if (error.response) {
+      console.error('TMDb API Error Response:', error.response.data);
+      res.status(error.response.status).json({ 
+        error: 'TMDb API Error',
+        details: error.response.data
+      });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch movies from TMDb' });
+    }
   }
 });
 
-// TMDb API proxy for getting movie details
+
 app.get('/api/tmdb/movie', async (req, res) => {
   try {
     const { id } = req.query;
+    if (!id) {
+      return res.status(400).json({ error: 'Movie ID is required' });
+    }
+
     const tmdbApiKey = '2e1ee69b814f88e54efdef84927bc4b3';
-    const response = await axios.get(`https://api.themoviedb.org/3/movie/${id}?api_key=${tmdbApiKey}&language=en-US&append_to_response=credits`);
+    const url = `https://api.themoviedb.org/3/movie/${id}?api_key=${tmdbApiKey}&language=en-US&append_to_response=credits`;
+    
+    console.log(`Fetching movie details for ID: ${id}`);
+    
+    const response = await axios.get(url, { timeout: 5000 }); // 5 second timeout
+    
     res.json(response.data);
   } catch (error) {
     console.error('Error fetching movie details from TMDb:', error);
@@ -154,7 +171,7 @@ app.get('/api/tmdb/movie', async (req, res) => {
   }
 });
 
-// Proxy route for OMDB movie details by ID
+
 app.get('/api/omdb/movie/:id', async (req, res) => {
   try {
     const id = req.params.id;
@@ -166,7 +183,7 @@ app.get('/api/omdb/movie/:id', async (req, res) => {
   }
 });
 
-// Proxy route for OMDB movie details by title and year
+
 app.get('/api/omdb/movie', async (req, res) => {
   try {
     const { title, year } = req.query;
@@ -187,7 +204,7 @@ app.get('/api/omdb/movie', async (req, res) => {
   }
 });
 
-// Serve static files from the public folder
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Page Routes
@@ -223,13 +240,15 @@ app.get('/randomMovie', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'randomMovie.html'));
 });
 
-// Error handling middleware
+
+
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: 'Something went wrong!' });
 });
 
-// Start the server
+
 const PORT = process.env.PORT || 5050;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

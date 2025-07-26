@@ -3,18 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <title>Webflix - Movies</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            'webflix-bg': '#1a0b2e', /* deep purple navy */
-            'webflix-accent': '#2fd8f2', /* bright teal/blue */
-            'webflix-dark': '#0d0521', /* darker purple for navigation */
-            'webflix-light': '#ffffff', /* white text */
-            'webflix-secondary': '#502d90' /* medium purple for elements */
+            'webflix-bg': '#1a0b2e', 
+            'webflix-accent': '#2fd8f2', 
+            'webflix-dark': '#0d0521', 
+            'webflix-light': '#ffffff', 
+            'webflix-secondary': '#502d90' 
           }
         }
       }
@@ -52,7 +51,7 @@
   <div class="container mx-auto p-4 pt-16 mt-2">
     <h1 class="text-2xl font-bold mb-6 text-webflix-accent text-center">Browse Movies</h1>
     
-    <!-- Search Bar - Centered and Narrower -->
+    
     <div class="mb-6 flex justify-center">
       <div class="w-full max-w-md flex">
         <input type="text" ng-model="searchTerm" placeholder="Search movies..." class="w-full p-2 border border-webflix-secondary rounded-l bg-webflix-dark bg-opacity-70 text-webflix-light">
@@ -60,7 +59,7 @@
       </div>
     </div>
     
-    <!-- Featured Random Movie -->
+    
     <div class="mb-8 flex justify-center" ng-if="movies.length > 0">
       <div class="w-4/5 bg-webflix-secondary bg-opacity-30 shadow-md rounded-lg overflow-hidden border border-webflix-secondary hover:shadow-lg hover:border-webflix-accent transition-all">
         <div class="flex flex-col md:flex-row">
@@ -73,7 +72,7 @@
             <h2 class="text-3xl font-bold mb-4 text-webflix-accent">{{ randomMovie.Title }}</h2>
             <p class="text-xl mb-4 text-webflix-light">{{ randomMovie.Year }}</p>
             <p class="text-webflix-accent mb-2">Featured Movie</p>
-            <!-- Additional movie details -->
+            
             <div class="mb-4" ng-if="randomMovieDetails">
               <p class="text-webflix-light mb-1"><span class="font-semibold text-webflix-accent">Director:</span> {{ randomMovieDetails.Director }}</p>
               <p class="text-webflix-light mb-1"><span class="font-semibold text-webflix-accent">Runtime:</span> {{ randomMovieDetails.Runtime }}</p>
@@ -93,7 +92,7 @@
       </div>
     </div>
     
-    <!-- Random Movie Generator Call-to-Action -->
+    
     <div class="mb-8 text-center">
       <p class="text-webflix-light mb-3">Looking for something specific? Try our advanced Random Movie Generator!</p>
       <button ng-click="goToRandomMovie()" class="bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium px-6 py-3 rounded-lg">

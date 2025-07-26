@@ -6,8 +6,7 @@ angular.module('imdbApp', [])
 
     $scope.login = function() {
       $http.post('/api/auth/login', $scope.loginData)
-        .then(function(response) {
-          // Redirect to movies page on successful login
+        .then(function(response) { 
           window.location.href = "/movies";
         }, function(error) {
           $scope.errorMessage = error.data.message || 'Login failed';

@@ -67,7 +67,7 @@ angular.module('imdbApp', ['ngCookies'])
         return;
       }
 
-      const apiKey = '228b48c4'; // Replace with your OMDb API key
+      const apiKey = '228b48c4'; 
       $http.get(`http://www.omdbapi.com/?s=${$scope.searchTerm}&apikey=${apiKey}`)
         .then(function(response) {
           if (response.data.Response === "True") {

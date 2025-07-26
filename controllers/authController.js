@@ -1,30 +1,75 @@
-// controllers/authController.js
+
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 
 exports.signup = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, email, password, age, address, phoneNumber } = req.body;
   
   try {
-    // Check if username already exists
-    const existingUser = await User.findOne({ username });
+    
+    const existingUser = await User.findOne({ 
+      $or: [{ username }, { email }] 
+    });
+    
     if (existingUser) {
-      return res.status(400).json({ message: 'Username already exists' });
+      return res.status(400).json({ 
+        message: existingUser.username === username ? 'Username already exists' : 'Email already exists' 
+      });
     }
     
-    // Hash the password using bcrypt
+    
+    if (!username || !email || !password || !age || !address || !phoneNumber) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+    
+    
+    if (username.length > 10) {
+      return res.status(400).json({ message: 'Username cannot exceed 10 characters' });
+    }
+    
+    
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Invalid email format' });
+    }
+    
+    
+    if (isNaN(age) || age < 0 || age > 112) {
+      return res.status(400).json({ message: 'Age must be between 0 and 112' });
+    }
+    
+    
+    if (address.length > 16) {
+      return res.status(400).json({ message: 'Address cannot exceed 16 characters' });
+    }
+    
+    
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      return res.status(400).json({ message: 'Phone number must be 10 digits' });
+    }
+    
+    
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     
-    // Create and save the new user
-    const newUser = new User({ username, password: hashedPassword });
+    
+    const newUser = new User({ 
+      username, 
+      email, 
+      password: hashedPassword,
+      age: parseInt(age),
+      address,
+      phoneNumber
+    });
+    
     await newUser.save();
     
-    // Set user cookie with full user object
+    
     const userData = { id: newUser._id, username: newUser.username };
     res.cookie('user', JSON.stringify(userData), { 
       path: '/',
-      httpOnly: false, // Allow JavaScript access
+      httpOnly: false, 
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax'
     });
@@ -32,7 +77,8 @@ exports.signup = async (req, res) => {
     res.status(201).json({ message: 'User created successfully' });
     
   } catch (error) {
-    res.status(500).json({ message: 'Error creating user', error });
+    console.error('Signup error:', error);
+    res.status(500).json({ message: 'Error creating user', error: error.message });
   }
 };
 
@@ -40,23 +86,23 @@ exports.login = async (req, res) => {
   const { username, password } = req.body;
   
   try {
-    // Lookup user in MongoDB
+    
     const user = await User.findOne({ username });
     if (!user) {
       return res.status(401).json({ message: 'Invalid username or password' });
     }
     
-    // Compare passwords using bcrypt
+    
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return res.status(401).json({ message: 'Invalid username or password' });
     }
     
-    // Set user cookie with full user object
+   
     const userData = { id: user._id, username: user.username };
     res.cookie('user', JSON.stringify(userData), { 
       path: '/',
-      httpOnly: false, // Allow JavaScript access
+      httpOnly: false, 
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax'
     });
@@ -69,7 +115,7 @@ exports.login = async (req, res) => {
 };
 
 exports.logout = (req, res) => {
-  // Clear the user cookie
+  
   res.clearCookie('user', { path: '/' });
   return res.json({ message: 'Logout successful' });
 };

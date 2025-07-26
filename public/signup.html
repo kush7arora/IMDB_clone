@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <title>Signup - Webflix</title>
-  <!-- Tailwind CSS CDN -->
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            'webflix-bg': '#1a0b2e', /* deep purple navy */
+            'webflix-bg': '#1a0b2e', 
             'webflix-accent': '#2fd8f2', /* bright teal/blue */
             'webflix-dark': '#0d0521', /* darker purple for navigation */
             'webflix-light': '#ffffff', /* white text */
@@ -22,16 +22,102 @@
   </script>
   <!-- AngularJS CDN -->
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
-  <!-- Signup app script -->
+  
   <script src="signupApp.js"></script>
 </head>
 <body class="bg-webflix-bg">
   <div class="max-w-md mx-auto mt-16 bg-webflix-secondary bg-opacity-30 shadow-md rounded-lg p-8 border border-webflix-secondary" ng-controller="SignupController">
     <h1 class="text-2xl font-bold text-center mb-6 text-webflix-accent">WEBFLIX - Signup</h1>
-    <form ng-submit="signup()" class="mb-6">
-      <input type="text" placeholder="Username" ng-model="signupData.username" required class="w-full p-2 mb-4 bg-webflix-dark bg-opacity-70 border border-webflix-secondary rounded text-webflix-light">
-      <input type="password" placeholder="Password" ng-model="signupData.password" required class="w-full p-2 mb-4 bg-webflix-dark bg-opacity-70 border border-webflix-secondary rounded text-webflix-light">
-      <button type="submit" class="w-full bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium p-2 rounded">Signup</button>
+    <form name="signupForm" ng-submit="signup()" class="mb-6" novalidate>
+      <!-- Username -->
+      <div class="mb-4">
+        <input type="text" placeholder="Username (max 10 characters)" 
+               ng-model="signupData.username" 
+               name="username"
+               ng-maxlength="10"
+               required 
+               class="w-full p-2 bg-webflix-dark bg-opacity-70 border border-webflix-secondary rounded text-webflix-light">
+        <div ng-show="signupForm.username.$dirty && signupForm.username.$invalid" class="text-red-400 text-sm mt-1">
+          <span ng-show="signupForm.username.$error.required">Username is required.</span>
+          <span ng-show="signupForm.username.$error.maxlength">Username cannot be longer than 10 characters.</span>
+        </div>
+      </div>
+      
+      <!-- Email -->
+      <div class="mb-4">
+        <input type="email" placeholder="Email" 
+               ng-model="signupData.email" 
+               name="email"
+               ng-pattern="/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/"
+               required 
+               class="w-full p-2 bg-webflix-dark bg-opacity-70 border border-webflix-secondary rounded text-webflix-light">
+        <div ng-show="signupForm.email.$dirty && signupForm.email.$invalid" class="text-red-400 text-sm mt-1">
+          <span ng-show="signupForm.email.$error.required">Email is required.</span>
+          <span ng-show="signupForm.email.$error.pattern">Please enter a valid email address.</span>
+        </div>
+      </div>
+      
+      <!-- Age -->
+      <div class="mb-4">
+        <input type="number" placeholder="Age (0-112)" 
+               ng-model="signupData.age" 
+               name="age"
+               min="0" 
+               max="112"
+               required 
+               class="w-full p-2 bg-webflix-dark bg-opacity-70 border border-webflix-secondary rounded text-webflix-light">
+        <div ng-show="signupForm.age.$dirty && signupForm.age.$invalid" class="text-red-400 text-sm mt-1">
+          <span ng-show="signupForm.age.$error.required">Age is required.</span>
+          <span ng-show="signupForm.age.$error.min">Age cannot be negative.</span>
+          <span ng-show="signupForm.age.$error.max">Age cannot be greater than 112.</span>
+        </div>
+      </div>
+      
+      
+      <div class="mb-4">
+        <input type="text" placeholder="Address (max 16 characters)" 
+               ng-model="signupData.address" 
+               name="address"
+               ng-maxlength="16"
+               required 
+               class="w-full p-2 bg-webflix-dark bg-opacity-70 border border-webflix-secondary rounded text-webflix-light">
+        <div ng-show="signupForm.address.$dirty && signupForm.address.$invalid" class="text-red-400 text-sm mt-1">
+          <span ng-show="signupForm.address.$error.required">Address is required.</span>
+          <span ng-show="signupForm.address.$error.maxlength">Address cannot be longer than 16 characters.</span>
+        </div>
+      </div>
+      
+      <!-- Phone Number -->
+      <div class="mb-4">
+        <input type="tel" placeholder="Phone Number" 
+               ng-model="signupData.phoneNumber" 
+               name="phoneNumber"
+               ng-pattern="/^[0-9]{10}$/"
+               required 
+               class="w-full p-2 bg-webflix-dark bg-opacity-70 border border-webflix-secondary rounded text-webflix-light">
+        <div ng-show="signupForm.phoneNumber.$dirty && signupForm.phoneNumber.$invalid" class="text-red-400 text-sm mt-1">
+          <span ng-show="signupForm.phoneNumber.$error.required">Phone number is required.</span>
+          <span ng-show="signupForm.phoneNumber.$error.pattern">Please enter a valid 10-digit phone number.</span>
+        </div>
+      </div>
+      
+      <!-- Password -->
+      <div class="mb-4">
+        <input type="password" placeholder="Password" 
+               ng-model="signupData.password" 
+               name="password"
+               required 
+               class="w-full p-2 bg-webflix-dark bg-opacity-70 border border-webflix-secondary rounded text-webflix-light">
+        <div ng-show="signupForm.password.$dirty && signupForm.password.$invalid" class="text-red-400 text-sm mt-1">
+          <span ng-show="signupForm.password.$error.required">Password is required.</span>
+        </div>
+      </div>
+      
+      <button type="submit" 
+              ng-disabled="signupForm.$invalid"
+              class="w-full bg-webflix-accent hover:bg-opacity-80 text-webflix-dark font-medium p-2 rounded">
+        Signup
+      </button>
     </form>
     <div class="text-center text-webflix-light">
       <p>Already have an account?</p>
